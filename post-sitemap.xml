@@ -23,14 +23,6 @@
     </url>
 
     <url>
-        <loc>https://ryuurock.com/2019/02/20/react-hoc-reverse-extend/</loc>
-        <lastmod>2019-10-17T02:59:03.649Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.6</priority>
-
-    </url>
-
-    <url>
         <loc>https://ryuurock.com/2018/01/09/puppeteer/</loc>
         <lastmod>2019-10-17T02:59:03.649Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -39,8 +31,8 @@
     </url>
 
     <url>
-        <loc>https://ryuurock.com/2018/06/09/nginx-use/</loc>
-        <lastmod>2019-10-17T02:59:03.648Z</lastmod>
+        <loc>https://ryuurock.com/2019/02/20/react-hoc-reverse-extend/</loc>
+        <lastmod>2019-10-17T02:59:03.649Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
 
@@ -48,6 +40,14 @@
 
     <url>
         <loc>https://ryuurock.com/2017/09/12/page-parallel-execute/</loc>
+        <lastmod>2019-10-17T02:59:03.648Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
+        <loc>https://ryuurock.com/2018/06/09/nginx-use/</loc>
         <lastmod>2019-10-17T02:59:03.648Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -103,7 +103,7 @@
     </url>
 
     <url>
-        <loc>https://ryuurock.com/2017/11/09/gulp/</loc>
+        <loc>https://ryuurock.com/2017/06/19/jQuery-ajax-intercept/</loc>
         <lastmod>2019-10-17T02:59:03.619Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -111,7 +111,7 @@
     </url>
 
     <url>
-        <loc>https://ryuurock.com/2017/06/19/jQuery-ajax-intercept/</loc>
+        <loc>https://ryuurock.com/2017/11/09/gulp/</loc>
         <lastmod>2019-10-17T02:59:03.619Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -151,7 +151,7 @@
     </url>
 
     <url>
-        <loc>https://ryuurock.com/2017/06/27/cross-domain/</loc>
+        <loc>https://ryuurock.com/2018/02/10/chrome-headless-spear-and-shield/</loc>
         <lastmod>2019-10-17T02:59:03.615Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -159,7 +159,7 @@
     </url>
 
     <url>
-        <loc>https://ryuurock.com/2018/02/10/chrome-headless-spear-and-shield/</loc>
+        <loc>https://ryuurock.com/2017/06/27/cross-domain/</loc>
         <lastmod>2019-10-17T02:59:03.615Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -175,7 +175,7 @@
     </url>
 
     <url>
-        <loc>https://ryuurock.com/2017/09/04/Observer/</loc>
+        <loc>https://ryuurock.com/2017/09/21/ES5-array-func/</loc>
         <lastmod>2019-10-17T02:59:03.597Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -183,7 +183,7 @@
     </url>
 
     <url>
-        <loc>https://ryuurock.com/2017/09/21/ES5-array-func/</loc>
+        <loc>https://ryuurock.com/2017/09/04/Observer/</loc>
         <lastmod>2019-10-17T02:59:03.597Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
