@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="baidu-site-verification" content="eulwuEPifC">
+    <meta name="google-site-verification" content="joVzxMTkPayXDku1yeDDsFCu-0IAjNpJpGWh_dNy6yQ">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content="Web前端|前端|javascript|css|html|html5">
+    <link rel="icon" href="/favicon.ico">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <title>
+        
+          搭建属于自己的web推送服务 - longwanxiang的博客 | Ryuurock | Web前端实习生
+        
+    </title>
+    <link rel="canonical" href="https://ryuurock.com/2017/12/10/node-websocket-server/">
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="//cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <!-- Custom CSS --> 
+    <link rel="stylesheet" href="/css/beantech.min.css">
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="stylesheet" href="/css/widget.css">
+    <link rel="stylesheet" href="/css/rocket.css">
+    <link rel="stylesheet" href="/css/signature.css">
+    <link rel="stylesheet" href="/css/toc.css">
+    <link rel="stylesheet" type="text/css" href="//at.alicdn.com/t/font_qt49r5gb9r8b0529.css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            background-image: url('/covers/post/15.jpg')
+            /*post*/
+        
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#nodejs" title="nodejs">nodejs</a>
+                            
+                              <a class="tag" href="/tags/#websocket" title="websocket">websocket</a>
+                            
+                        </div>
+                        <h1>搭建属于自己的web推送服务</h1>
+                        <h2 class="subheading"></h2>
+                        <span class="meta">
+                            Posted by Wanxiang Long(Ryuurock) on
+                            2017-12-10
+                        </span>
+                    </div>
+                
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Longwx Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Modify by Yu-Hsuan Yen -->
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>上一次说<code>websocket</code>还是在“<a href="/2017/09/12/page-parallel-execute">解决Websocket并发执行的问题</a>”这篇文章，不过提到的内容是在不同标签页的消息同时到来时的处理方式，不过治标不治本，还是有几率出现重复推送的问题，而且这样的代码也不是很严谨，所以这个问题只能从服务端着手了。其实在很早之前就看过<code>goeasy</code>这个第三方推送服务的<code>client</code>源码，当时就吐槽它们代码之烂，二次封装的代码居然直接修改了<code>socket.io</code>（goeasy是基于nodejs的开源库<a href="http://socket.io" target="_blank" rel="noopener">socket.io</a>来做的）的源码，然后添加了自己的代码，再将<code>goeasy</code>构造函数强行暴露给window，据说是为了适配不同了浏览器要求一定要动态引用他们的js代码，我猜应该是做了cdn处理吧，可恶的是还拒绝缓存，所以有时候会造成我们网站一直等待goeasy的js代码。扯远了，还是说说我们自己如何去构建一个基于channel的推送服务吧。</p>
+<p><code>socoket.io</code>这个库把自己封装得更像是一个聊天室，甚至里面的有属性也命名为<code>room</code>（若理解错误还请轻喷）。我们的网页应用更侧重于按用户id接收来自服务器的消息推送，因为可能存在多个标签页，所以就可能反复的订阅消息，这也是导致上面我的提到的重复推送的问题，因为我们是基于h5的<code>Notification</code>来做的，网页一旦都接收消息，就会出现几个标签页，收到几次桌面通知的问题。所以，我也是直接吸收了goeasy的设计思路，直接按channel来订阅和发送消息。文档都是摆在那儿的，网上零零碎碎的教程也不系统化，还是只能看官方文档，英语不到位也只能看会儿机翻的结果再适当切回去。</p>
+<p>我采用的是<code>socket.io + express 4</code>的模式，其实要将二者结合起来还是非常简单的</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> app = <span class="built_in">require</span>( <span class="string">'express'</span> )();</span><br><span class="line"><span class="keyword">var</span> server = <span class="built_in">require</span>( <span class="string">'http'</span> ).createServer( app );</span><br><span class="line"><span class="keyword">var</span> io = <span class="built_in">require</span>( <span class="string">'socket.io'</span> )( server );</span><br><span class="line">server.listen( <span class="number">3000</span> );</span><br></pre></td></tr></table></figure>
+<p>主要还是在<code>io</code>这里，我们需要处理来自客户端的连接事件</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">io.on( <span class="string">'connection'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"> socket </span>) </span>&#123;</span><br><span class="line">  socket</span><br><span class="line">    .on( <span class="string">'login'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"> &#123; channel, socketDeviceID &#125; </span>) </span>&#123;</span><br><span class="line">      <span class="comment">// 这里至关重要，我们用这个标记这个连接是否来自同一个浏览器</span></span><br><span class="line">      socket.socketDeviceID = socketDeviceID</span><br><span class="line">      <span class="comment">// 将这个连接合并到channel这个频道，也就是用户id</span></span><br><span class="line">      socket.join( channel )</span><br><span class="line">    &#125; )</span><br><span class="line">    .on( <span class="string">'message'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"> content </span>) </span>&#123;</span><br><span class="line">      messageSend( io, content )</span><br><span class="line">    &#125; )</span><br><span class="line">&#125; )</span><br></pre></td></tr></table></figure>
+<p>其实这里很简单，就是监听客户端连接，然后再监听当前连接的login事件，再自动合并相同用户的连接。<br>
+为了方便理解再贴上客户端代码</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> io <span class="keyword">from</span> <span class="string">'socket.io-client'</span></span><br><span class="line"><span class="keyword">let</span> socket = io( <span class="string">'localhost:3000'</span> )</span><br><span class="line"></span><br><span class="line">soket.emit( <span class="string">'login'</span>, &#123;</span><br><span class="line">  channel: <span class="string">'user1'</span>,</span><br><span class="line">  socketDeviceID: <span class="string">'xxxxxxx'</span> <span class="comment">// 这里是一个随机字符串，反正能尽量保证当前浏览器的唯一性就好了</span></span><br><span class="line">&#125; )</span><br></pre></td></tr></table></figure>
+<p>客户端也很简单吧。<br>
+其实麻烦的是我们要处理消息的发送就是上面的<code>messageSend</code>函数要做的事，<code>content</code>的结构因该是</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"channel"</span>: <span class="string">""</span>,</span><br><span class="line">  <span class="attr">"content"</span>: <span class="string">""</span>,</span><br><span class="line">  <span class="attr">"ak"</span>: <span class="string">""</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>用户id，发送内容和<code>application key</code>，ak是为了防止别人恶意调用。<br>
+上面的<code>message</code>事件只是为了后面的客户端提交，我们的程序服务端要发送事件应该提供更友好的发送方式，所以我们就需要一个url来提供api形式的推送<code>express</code>的路由就不赘述了，因为不是本篇文章的讲述内容。下面是<code>/publish</code>接口的处理函数</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">messageSend( io, &#123; channel, content, ak &#125; ) &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> ( ak !== <span class="string">'ak'</span> ) <span class="keyword">return</span> <span class="built_in">Promise</span>.resolve( <span class="number">10001</span> )</span><br><span class="line">  <span class="keyword">if</span> ( !channel || !content ) <span class="keyword">return</span> <span class="built_in">Promise</span>.resolve( <span class="number">10002</span> )</span><br><span class="line">  <span class="keyword">let</span> &#123; event &#125; = <span class="keyword">typeof</span> content !== <span class="string">'object'</span> ? <span class="built_in">JSON</span>.parse( content ) : content</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>( <span class="function">(<span class="params"> resolve, reject </span>) =&gt;</span> &#123;</span><br><span class="line">    io.to( channel ).clients( <span class="function"><span class="keyword">function</span>(<span class="params"> err, clients </span>) </span>&#123;</span><br><span class="line">      err &amp;&amp; reject( err )</span><br><span class="line">      <span class="keyword">let</span> &#123; connected &#125; = io.of( <span class="string">'/'</span> )</span><br><span class="line">      <span class="keyword">let</span> promiseArray = []</span><br><span class="line">      <span class="comment">// 我们在这里单独处理message类型的事件</span></span><br><span class="line">      <span class="comment">// ps: 推往客户端的内容有一个规范，event字段为必须项，用来描述内容的类型，messge|refresh等</span></span><br><span class="line">      <span class="keyword">if</span> ( event === <span class="string">'message'</span> ) &#123;</span><br><span class="line">        <span class="keyword">let</span> names = &#123;&#125;</span><br><span class="line">        <span class="comment">// 在这里将来自同一个浏览器的连接进行合并，取最后连接上的那个连接</span></span><br><span class="line">        clients.forEach( <span class="function"><span class="params">item</span> =&gt;</span> names[ connected[ item ].socketDeviceID ] = item )</span><br><span class="line">        <span class="comment">// 填充消息进行发送</span></span><br><span class="line">        promiseArray = <span class="built_in">Object</span>.keys( names ).map( <span class="function"><span class="params">key</span> =&gt;</span> messageEmit( connected[ names[ key ] ], channel, content ) )</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        promiseArray = clients.map( <span class="function"><span class="params">clientId</span> =&gt;</span> messageEmit( connected[ clientId ], channel, content ) )</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 将消息一并发送出去 </span></span><br><span class="line">      <span class="comment">// TODO，应将0以外的消息进行筛选</span></span><br><span class="line">      <span class="built_in">Promise</span>.all( promiseArray ).then( <span class="function"><span class="params">()</span> =&gt;</span> resolve( <span class="number">0</span> ) )</span><br><span class="line">    &#125; )</span><br><span class="line">  &#125; )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这是对消息的发送对象进行处理，下面是发送逻辑</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 发送消息，延迟N秒后告知发送失败</span></span><br><span class="line"><span class="comment"> * @param &#123;*&#125; socket </span></span><br><span class="line"><span class="comment"> * @param &#123;*&#125; content </span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">messageEmit</span>(<span class="params"> socket, channel, content </span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> &#123; event &#125; = <span class="keyword">typeof</span> content !== <span class="string">'object'</span> ? <span class="built_in">JSON</span>.parse( content ) : content</span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">pushDBData</span>(<span class="params"> status </span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> platform = channel.substr( channel.lastIndexOf( <span class="string">'_'</span> ) + <span class="number">1</span> )</span><br><span class="line">    <span class="comment">// 将消息发送结果存入等待持久化的队列</span></span><br><span class="line">    pushArrayAdd( &#123;</span><br><span class="line">      channel,</span><br><span class="line">      status,</span><br><span class="line">      send_content: <span class="built_in">JSON</span>.stringify( content ),</span><br><span class="line">      push_date: <span class="built_in">Date</span>.now(),</span><br><span class="line">      event_type: event,</span><br><span class="line">      platform</span><br><span class="line">    &#125; )</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>( <span class="function">(<span class="params"> resolve </span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> retry = retryTimes</span><br><span class="line">    <span class="keyword">let</span> timeID = setTimeout( <span class="function"><span class="keyword">function</span> <span class="title">sendTimeout</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">if</span> ( !retry ) &#123;</span><br><span class="line">        resolve( <span class="number">10000</span> )</span><br><span class="line">        pushDBData( <span class="number">0</span> )</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        retry--</span><br><span class="line">        sendTimeout()</span><br><span class="line">        <span class="built_in">console</span>.log( <span class="string">`<span class="subst">$&#123;<span class="keyword">new</span> <span class="built_in">Date</span>&#125;</span>用户“<span class="subst">$&#123;channel&#125;</span>”消息发送超时`</span> )</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;, sendTimeout )</span><br><span class="line">    socket.emit( <span class="string">'message'</span>, content, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      resolve( <span class="number">0</span> )</span><br><span class="line">      clearTimeout( timeID )</span><br><span class="line">      pushDBData( <span class="number">1</span> )</span><br><span class="line">    &#125; )</span><br><span class="line">  &#125; ).catch( <span class="function"><span class="params">err</span> =&gt;</span> &#123; <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>( err ) &#125; )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对消息发送，超出时间未收到客户端的响应递归尝试N次，一直失败则判定为失败。这里的10000和0都是对接口请求者的响应码。<br>
+接下来是对发送记录的入库</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">exports.pushArrayAdd = <span class="function"><span class="keyword">function</span>(<span class="params"> pushItem </span>) </span>&#123;</span><br><span class="line">  pushArray.push( pushItem )</span><br><span class="line">  <span class="keyword">if</span> ( pushArray.length &gt;= <span class="number">100</span> ) &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`插入数据库<span class="subst">$&#123;<span class="keyword">new</span> <span class="built_in">Date</span>&#125;</span>`</span>)</span><br><span class="line">    <span class="comment">// 每一百条数据清空一次</span></span><br><span class="line">    staistical.insertPushRecord( _.cloneDeep( pushArray ) )</span><br><span class="line">    pushArray = []</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>pushArray</code>肯定是一个单例模式的数据，也就是我们的<code>dataStore</code>，我们肯定不能发一条就存一条，这也不专业，定时储存或达到一个量再储存是比较为数据库着想的。如果消息推送得少我们可以再启动一个定时器定时去清空一次这个队列，防止数据过久存放在内存里导致更新不及时，或服务重启导致的数据丢失。<br>
+接下来就是数据库的写入操作了，nodejs发展到今天生态已经很好了，对mysql进行操作的包与其同名，不过操作起来感觉还是过于简陋，对于<code>connection</code>都是手动拿手动释放。不过连接池这一块貌似很方便。期间用到了非常非常多的回调，mysql这个包也没有提供Promise返回（我猜的，官方推荐是回调的形式），还好我用的nodejs版本比较高，我便优雅的全部封装成Promise返回了，方便我调用，于是像<code>query、insert</code>这样的函数我就直接声明成<code>asycn</code>函数了</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> mysql = <span class="built_in">require</span>( <span class="string">'mysql'</span> )</span><br><span class="line"><span class="keyword">const</span> &#123; <span class="attr">mysql</span>: mysqlConfig &#125; = <span class="built_in">require</span>( <span class="string">'../config'</span> )</span><br><span class="line"><span class="keyword">const</span> pool = mysql.createPool( mysqlConfig )</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 获取连接池中的连接</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="class"><span class="keyword">class</span> <span class="title">DBBase</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 获取数据库连接</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  getConnection() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>( <span class="function">(<span class="params"> resolve, reject </span>) =&gt;</span> &#123;</span><br><span class="line">      pool.getConnection( <span class="function">(<span class="params"> err, connection </span>) =&gt;</span> ( err ? reject( err ) : resolve( connection ) ) )</span><br><span class="line">    &#125; ).catch( <span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="built_in">console</span>.log( err )</span><br><span class="line">    &#125; )</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 查询记录</span></span><br><span class="line"><span class="comment">   * </span></span><br><span class="line"><span class="comment">   * @param &#123;*&#125; sql </span></span><br><span class="line"><span class="comment">   * @param &#123;*&#125; condition </span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">async</span> query( sql, condition ) &#123;</span><br><span class="line">    <span class="keyword">let</span> con = <span class="keyword">await</span> <span class="keyword">this</span>.getConnection()</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>( <span class="function">(<span class="params"> resolve, reject </span>) =&gt;</span> &#123;</span><br><span class="line">      con.query( sql, condition, ( err, result ) =&gt; &#123;</span><br><span class="line">        err ? reject( err ) : resolve( result )</span><br><span class="line">        con.release()</span><br><span class="line">      &#125; )</span><br><span class="line">    &#125; )</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 插入记录</span></span><br><span class="line"><span class="comment">   * </span></span><br><span class="line"><span class="comment">   * @param &#123;*&#125; sql </span></span><br><span class="line"><span class="comment">   * @param &#123;*&#125; dataArray </span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  insert( sql, dataArray ) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.query( sql, [ dataArray ] )</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这是所有需要有数据库操作的对象的基类，这样一来我所有的操作就不用再去手动取连接，用完再释放了，下面是继承它的子类的一些简单操作</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">StatisticalDao</span> <span class="keyword">extends</span> <span class="title">DBBase</span> </span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>() &#123;</span><br><span class="line">    <span class="keyword">super</span>()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">async</span> insertPushRecord( arr ) &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">let</span> insertData = arr.map( <span class="function"><span class="params">item</span> =&gt;</span> ( [</span><br><span class="line">      item.push_date,</span><br><span class="line">      item.send_content,</span><br><span class="line">      item.status,</span><br><span class="line">      item.channel,</span><br><span class="line">      item.event_type,</span><br><span class="line">      item.platform</span><br><span class="line">    ] ) )</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">await</span> <span class="keyword">this</span>.insert( <span class="string">`insert into bigwe_notification_records( </span></span><br><span class="line"><span class="string">      push_date, </span></span><br><span class="line"><span class="string">      send_content, </span></span><br><span class="line"><span class="string">      status,</span></span><br><span class="line"><span class="string">      channel,</span></span><br><span class="line"><span class="string">      event_type,</span></span><br><span class="line"><span class="string">      platform</span></span><br><span class="line"><span class="string">    ) values ?`</span>,</span><br><span class="line">      insertData )</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="keyword">new</span> StatisticalDao()</span><br></pre></td></tr></table></figure>
+<p>哈，Dao的结尾命名纯属情怀，想起了写java的时光。这里的<code>insertPushRecord</code>方法就是上面对队列里的数据操作时调用的方法，批量插入数据。<br>
+其实在接收来此接口请求者post过来的数据的时候还有点小插曲，先是get取得到post取不到于是加了这句</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> bodyParser = <span class="built_in">require</span>( <span class="string">'body-parser'</span> )</span><br><span class="line"></span><br><span class="line">app.use( bodyParser.json() )</span><br><span class="line">app.use( bodyParser.urlencoded( &#123; <span class="attr">extended</span>: <span class="literal">true</span> &#125; ) )</span><br></pre></td></tr></table></figure>
+<p>html端post取到了，后面模拟真实后端post，又取不到了，原来是格式原因，<code>jquery</code>默认了我们的json格式于是以application/json的格式post，而后端的post是以<code>form</code>的格式post，于是又引入了</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> connectMultiparty = <span class="built_in">require</span>( <span class="string">'connect-multiparty'</span> )</span><br><span class="line">app.post( <span class="string">'/publish'</span>, connectMultiparty(), routerHandler.publish( io ) )</span><br></pre></td></tr></table></figure>
+<p>这样来处理form数据，真是坎坷啊。</p>
+<p>以上则是服务端的大致情况，当然，这仅仅是能完成推送服务，还有在线人数统计等需要慢慢完善的功能。<br>
+客户端的代码则相当简单了，提供一个订阅函数就好了，并且在代码里记得<code>ws</code>断线重连后重新login，不然就接收不到消息了。<br>
+完整的代码整理后会放到github，敬请期待~ 😄</p>
+
+
+                <hr>
+                <!-- JiaThis Button BEGIN -->
+                <!-- <div class="jiathis_style_24x24">
+                    <a class="jiathis_button_weixin"></a>
+                    <a class="jiathis_button_qzone"></a>
+                    <a class="jiathis_button_tsina"></a>
+                    <a class="jiathis_button_cqq"></a>
+                    <a class="jiathis_button_fb"></a>
+                    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+                </div>
+                <script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>-->
+                <!-- JiaThis Button END -->
+                <!-- Pager -->
+                <ul class="pager clearfix">
+                    
+                        <li class="previous">
+                            <a href="/2018/01/09/puppeteer/" data-toggle="tooltip" data-placement="top" title="Puppeteer 初探">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2017/11/27/chrome-extention/" data-toggle="tooltip" data-placement="top" title="记一次chrome扩展开发">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+
+                <!-- UY BEGIN -->
+                <br>
+                <div id="uyan_frame"></div>
+                <!--<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2138668"></script>-->
+                <!-- UY END -->
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      <aside id="sidebar">
+        <div id="toc" class="toc-article">
+        <strong class="toc-title">Contents</strong>
+        
+          <ol class="nav">none</ol>
+        
+        </div>
+      </aside>
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#nodejs" title="nodejs">nodejs</a>
+                        
+                          <a class="tag" href="/tags/#websocket" title="websocket">websocket</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+                    <li>
+                        <a target="_blank" href="http://weibo.com/2539035205">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/Ryuurock">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a href="mailto:lwx_1993@outlook.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Wanxiang Long(Ryuurock) &copy; 1993-2019 
+                    <br>
+                    <span id="busuanzi_container_site_uv">小站访客数<span id="busuanzi_value_site_uv"></span>人次</span>
+                    |
+                    <span id="busuanzi_container_site_pv">小站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/lx-blog.js"></script>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+	<a id="rocket" href="#top" class="iconfont icon-23435"></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+<!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

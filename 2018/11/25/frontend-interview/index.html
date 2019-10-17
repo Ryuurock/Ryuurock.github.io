@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="baidu-site-verification" content="eulwuEPifC">
+    <meta name="google-site-verification" content="joVzxMTkPayXDku1yeDDsFCu-0IAjNpJpGWh_dNy6yQ">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content="Web前端|前端|javascript|css|html|html5">
+    <link rel="icon" href="/favicon.ico">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <title>
+        
+          一篇前端面试题的作业 - longwanxiang的博客 | Ryuurock | Web前端实习生
+        
+    </title>
+    <link rel="canonical" href="https://ryuurock.com/2018/11/25/frontend-interview/">
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="//cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <!-- Custom CSS --> 
+    <link rel="stylesheet" href="/css/beantech.min.css">
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="stylesheet" href="/css/widget.css">
+    <link rel="stylesheet" href="/css/rocket.css">
+    <link rel="stylesheet" href="/css/signature.css">
+    <link rel="stylesheet" href="/css/toc.css">
+    <link rel="stylesheet" type="text/css" href="//at.alicdn.com/t/font_qt49r5gb9r8b0529.css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            background-image: url('/covers/post/IMG_2544.JPG')
+            /*post*/
+        
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#面试" title="面试">面试</a>
+                            
+                        </div>
+                        <h1>一篇前端面试题的作业</h1>
+                        <h2 class="subheading"></h2>
+                        <span class="meta">
+                            Posted by Wanxiang Long(Ryuurock) on
+                            2018-11-25
+                        </span>
+                    </div>
+                
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Longwx Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Modify by Yu-Hsuan Yen -->
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>原文地址：<a href="https://mp.weixin.qq.com/s/e-IC588SZPJK2QRBm3KuHA" target="_blank" rel="noopener">2019年前端面试都聊啥？一起来看看</a><br>
+有一些问题自己的答案不是很清楚，所以直接实践后贴出来</p>
+<h1><span id="基本的javascript问题">基本的JavaScript问题</span></h1>
+<h2><span id="使以下代码正常运行">使以下代码正常运行：</span></h2>
+<p><img src="1.webp" alt><br>
+参考答案：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Array</span>.prototype.multiply = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.push(...this.map(<span class="function"><span class="params">item</span> =&gt;</span> <span class="built_in">Math</span>.pow(item, <span class="number">2</span>)));</span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">const</span> a = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]; </span><br><span class="line">a.multiply()</span><br><span class="line"><span class="built_in">console</span>.log(a);</span><br></pre></td></tr></table></figure>
+<h2><span id="以下代码在-javascript-中返回false-请说明为什么">以下代码在 JavaScript 中返回<code>false</code>。 请说明为什么</span></h2>
+<p><img src="2.webp" alt><br>
+参考答案：<a href="https://segmentfault.com/a/1190000012175422" target="_blank" rel="noopener">为什么0.1+0.2不等于0.3</a><br>
+不想看的我直接一句话总结</p>
+<blockquote>
+<p>0.1在被转换成二进制时是一个<strong>二进制无限循环小数</strong>，但计算机内存有限在某个精度点直接舍弃。当代码被编译或解释后，0.1已经被四舍五入成一个与之很接近的计算机内部数字，以至于计算还没开始，一个很小的舍入错误就已经产生了。这也就是 0.1 + 0.2 不等于0.3 的原因<br>
+解决办法：使用<a href="https://github.com/MikeMcl/bignumber.js" target="_blank" rel="noopener">bignumber.js</a></p>
+</blockquote>
+<h2><span id="解决以下异步代码问题">解决以下异步代码问题。</span></h2>
+<p>检索并计算属于同一教室中每个学生的平均分数，例子中教室 ID 为 75。每个学生可以在一年内参加一门或多门课程。以下 API 可用于检索所需数据。<br>
+<img src="3.webp" alt><br>
+编写一个接受教室 ID 的函数，并根据该函数计算该教室中每个学生的平均值。 该函数的最终输出应该是带有平均分数的学生列表：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">  &#123; <span class="attr">"id"</span>: <span class="number">1</span>, <span class="attr">"name"</span>: <span class="string">"John"</span>, <span class="attr">"average"</span>: <span class="number">70.5</span> &#125;,</span><br><span class="line">  &#123; <span class="attr">"id"</span>: <span class="number">3</span>, <span class="attr">"name"</span>: <span class="string">"Lois"</span>, <span class="attr">"average"</span>: <span class="number">67</span> &#125;,</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>使用普通回调，promise，observables，generator 或 async/wait 编写所需的函数。 尝试使用至少 3 种不同的技术解决这个问题。<br>
+这里我尝试使用<code>async/wait</code>来实现</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//----------------async-wait版本 </span></span><br><span class="line"><span class="keyword">const</span> APIS = &#123;</span><br><span class="line">  STUDENTS: <span class="string">'/api/students'</span>,</span><br><span class="line">  COURSES: <span class="string">'/api/courses'</span>,</span><br><span class="line">  EVALUATION: <span class="string">'/api/evaluation/'</span></span><br><span class="line">&#125;; </span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fetchData</span>(<span class="params">api</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="params">resolve</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> data = <span class="literal">null</span>;</span><br><span class="line">    <span class="keyword">switch</span> (api) &#123;</span><br><span class="line">      <span class="keyword">case</span> APIS.STUDENTS:</span><br><span class="line">        data = [&#123;</span><br><span class="line">          id: <span class="number">1</span>,</span><br><span class="line">          name: <span class="string">'John'</span>,</span><br><span class="line">          classroomId: <span class="number">75</span></span><br><span class="line">        &#125;, &#123;</span><br><span class="line">          id: <span class="number">1</span>,</span><br><span class="line">          name: <span class="string">'Tom'</span>,</span><br><span class="line">          classroomId: <span class="number">75</span></span><br><span class="line">        &#125;];</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> APIS.COURSES:</span><br><span class="line">        data = [&#123;</span><br><span class="line">          id: <span class="string">'history'</span>,</span><br><span class="line">          studentId: <span class="number">1</span></span><br><span class="line">        &#125;, &#123;</span><br><span class="line">          id: <span class="string">'algebra'</span>,</span><br><span class="line">          studentId: <span class="number">1</span></span><br><span class="line">        &#125;];</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> APIS.EVALUATION:</span><br><span class="line">        data = &#123;</span><br><span class="line">          id: <span class="string">'200'</span>,</span><br><span class="line">          score: <span class="number">50</span>,</span><br><span class="line">          totalScore: <span class="number">100</span></span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125; </span><br><span class="line">    resolve(data);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125; </span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fetchStudents</span>(<span class="params">classroomId</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> fetchData(APIS.STUDENTS, &#123;</span><br><span class="line">    classroomId</span><br><span class="line">  &#125;);</span><br><span class="line">&#125; </span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fetchCourses</span>(<span class="params">studentId</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> fetchData(APIS.COURSES, &#123;</span><br><span class="line">    studentId</span><br><span class="line">  &#125;);</span><br><span class="line">&#125; </span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fetchEvaluation</span>(<span class="params">course, studentId</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// 地址本来应该拼接为`$&#123;APIS.EVALUATION&#125;$&#123;course&#125;`，为了方便mock数据就直接写死了</span></span><br><span class="line">  <span class="keyword">return</span> fetchData(APIS.EVALUATION, &#123;</span><br><span class="line">    studentId</span><br><span class="line">  &#125;);</span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">main</span>(<span class="params">classRoomId</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> students = <span class="keyword">await</span> fetchStudents(classRoomId);</span><br><span class="line">  <span class="keyword">const</span> studentsPromise = students.map(<span class="keyword">async</span> (student) =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> courses = <span class="keyword">await</span> fetchCourses(student.id);</span><br><span class="line">    <span class="keyword">const</span> coursesPromise = courses.map(<span class="keyword">async</span> (course) =&gt; &#123;</span><br><span class="line">      <span class="keyword">const</span> evaluation = <span class="keyword">await</span> fetchEvaluation(course.id, student.id);</span><br><span class="line">      course.evaluation = evaluation;</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">await</span> <span class="built_in">Promise</span>.all(coursesPromise);</span><br><span class="line">    student.courses = courses;</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="keyword">await</span> <span class="built_in">Promise</span>.all(studentsPromise);</span><br><span class="line">  <span class="comment">// 此时得到每个学生 每门课程下的分数的数据 可以进行求平均分了</span></span><br><span class="line">  <span class="keyword">const</span> average = students.map(<span class="function">(<span class="params">&#123; id, name, courses &#125;</span>) =&gt;</span> (&#123;</span><br><span class="line">    id,</span><br><span class="line">    name,</span><br><span class="line">    average: courses.reduce(<span class="function">(<span class="params">prev, current</span>) =&gt;</span> prev + current.evaluation.score, <span class="number">0</span>) / courses.length</span><br><span class="line">  &#125;)); </span><br><span class="line">  <span class="built_in">console</span>.log(average);</span><br><span class="line">  <span class="comment">// [ &#123; id: 1, name: 'John', average: 50 &#125;, &#123; id: 1, name: 'Tom', average: 50 &#125; ]</span></span><br><span class="line">&#125; </span><br><span class="line">main(<span class="number">72</span>);</span><br></pre></td></tr></table></figure>
+<p>👉其实这里我们还可以使用<code>for..of</code>进行遍历以避免使用Promise.all<br>
+<s>其实我觉得，设计这种接口真的不会被打吗😂</s><br>
+平均每个学生选了一门课 每个接口耗时50ms 一个班有100人</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">50</span> * <span class="number">1</span> + <span class="number">100</span> * <span class="number">50</span> = <span class="number">5050</span></span><br></pre></td></tr></table></figure>
+<p>需要5秒<br>
+如果选了两门课，就是10秒，还好chrome同域并发为6个。。。。<br>
+当然，如果使用http/2不会存在这种问题</p>
+<h2><span id="使用-javascript-proxy实现简单的数据绑定">使用 JavaScript Proxy实现简单的数据绑定</span></h2>
+<p>相信拜读过阮老师的<a href="http://es6.ruanyifeng.com" target="_blank" rel="noopener">es6入门</a>应该都是小case</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> data = &#123;</span><br><span class="line">  userName: <span class="string">'Tom'</span></span><br><span class="line">&#125;; </span><br><span class="line"><span class="keyword">const</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(data, &#123;</span><br><span class="line">  <span class="keyword">get</span>: function (target, key, receiver) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">Reflect</span>.get(target, key, receiver);</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="keyword">set</span>: function (target, key, value, receiver) &#123;</span><br><span class="line">    <span class="keyword">const</span> dom = <span class="built_in">document</span>.getElementById(key);</span><br><span class="line">    <span class="keyword">if</span> (dom) &#123;</span><br><span class="line">      dom.innerText = value;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">Reflect</span>.set(target, key, value, receiver);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;); </span><br><span class="line"><span class="comment">// 此时id为userName的元素文本会得到更新</span></span><br><span class="line">proxy.userName = <span class="string">'Jerry'</span>;</span><br></pre></td></tr></table></figure>
+<h2><span id="解释-javascript-并发模型">解释 JavaScript 并发模型</span></h2>
+<p><s>讲真，18年初这块我就没怕过 😐<a href="https://ryuurock.com/2018/02/27/front-end-focus/">前端疑难问题整理</a></s></p>
+<h2><span id="new-关键字在-javascript-中有什么作用">“new” 关键字在 JavaScript 中有什么作用？</span></h2>
+<p>MDN的 <a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/new" target="_blank" rel="noopener">new运算符<br>
+</a><br>
+知乎的<s>说人话</s>版本( ﹁ ﹁ ) ~→<a href="https://zhuanlan.zhihu.com/p/23987456" target="_blank" rel="noopener">JS 的 new 到底是干什么的？</a><br>
+<strong>个人总结：对相似行为对象进行抽象，在创建时更能节约内存/代码</strong></p>
+<ul>
+<li>[[Construct]]: 这个属性应当指向构造函数本身</li>
+<li>[[Call]]: emmmm不是很清楚这里是否指的是Function对象的call方法</li>
+</ul>
+<h2><span id="javascript-中有哪些不同的函数调用模式-详细解释">JavaScript 中有哪些不同的函数调用模式？ 详细解释。</span></h2>
+<p>原文提示有点问题，少了一个构造函数调用模式</p>
+<ul>
+<li>方法调用模式<br>
+当函数（Function）作为对象属性时被称为方法（Method）。方法被调用时this会被绑定到对应的对象。比如foo.method()</li>
+<li>函数调用模式<br>
+当函数不是对象属性时，它就会被当做函数来调用，比如add(2,3)。 此时this绑定到了全局对象global。</li>
+<li>构造函数调用模式<br>
+JavaScript中，那些用来new对象的函数成为构造函数。</li>
+<li>上下文调用模式（有的地方又叫call/apply调用模式🤦‍）<br>
+function foo() {}<br>
+foo.call(context, 参数列表)<br>
+foo.apply(context, 参数数组)</li>
+</ul>
+<h2><span id="解释即将发布的任一新-ecmascript-提案">解释即将发布的任一新 ECMAScript 提案。</span></h2>
+<ul>
+<li>do 表达式</li>
+<li>throw 表达式</li>
+<li>链判断运算符</li>
+<li>直接输入 U+2028 和 U+2029</li>
+<li>函数的部分执行</li>
+<li>管道运算符</li>
+<li>数值分隔符</li>
+<li>BigInt 数据类型</li>
+<li>Math.signbit()</li>
+</ul>
+<p><a href="http://es6.ruanyifeng.com/#docs/proposals" target="_blank" rel="noopener">最新提案</a><br>
+如果你觉得不过瘾那就走这<a href="https://github.com/tc39/ecma262" target="_blank" rel="noopener">https://github.com/tc39/ecma262</a></p>
+<h2><span id="javascript-中的迭代器iterators和迭代iterables是什么-你知道什么是内置迭代器吗">JavaScript 中的迭代器（iterators）和迭代（iterables）是什么？ 你知道什么是内置迭代器吗？</span></h2>
+<blockquote>
+<p>Iterator是一种接口，为各种不同的数据结构提供统一的访问机制。任何数据结构只要部署 Iterator 接口，就可以完成遍历操作（即依次处理该数据结构的所有成员）。<br>
+Iterator 的遍历过程是这样的。</p>
+</blockquote>
+<ol>
+<li>创建一个指针对象，指向当前数据结构的起始位置。也就是说，遍历器对象本质上，就是一个指针对象。</li>
+<li>第一次调用指针对象的next方法，可以将指针指向数据结构的第一个成员。</li>
+<li>第二次调用指针对象的next方法，指针就指向数据结构的第二个成员。</li>
+<li>不断调用指针对象的next方法，直到它指向数据结构的结束位置。<br>
+iterable 即可迭代的，实现或部署了Iterator街口,如：</li>
+</ol>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> obj = &#123;</span><br><span class="line">  [<span class="built_in">Symbol</span>.iterator] : <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">      next: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> &#123;</span><br><span class="line">          value: <span class="number">1</span>,</span><br><span class="line">          done: <span class="literal">true</span></span><br><span class="line">        &#125;;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>此时的<code>obj</code>就是一个iterable对象，可以使用<code>for...of</code>进行遍历</p>
+<h2><span id="如何在-json-中序列化以下对象">如何在 JSON 中序列化以下对象？</span></h2>
+<p>如果我们将以下对象转换为 JSON 字符串，会发生什么？<br>
+<img src="11.webp" alt><br>
+<code>key1</code>属性将消失，因为Symbol类型的值不会被<code>JSON.strigify</code>返回，我们可以在调用<code>JSON.strigify</code>之前手动调用Symbol值的toString方法</p>
+<h2><span id="你熟悉-typed-arrays-吗-如果熟悉请解释他们与-javascript-中的传统数组相比的异同">你熟悉 Typed Arrays 吗？ 如果熟悉，请解释他们与 JavaScript 中的传统数组相比的异同？</span></h2>
+<p>翻译过来似乎叫<strong>类数组</strong>？<br>
+TypedArray本质上是一个抽象类，他表示9中特定类型： <code>Int8Array</code>, <code>Uint8Array</code>, <code>Int16Array</code>, <code>Uint16Array</code>, <code>Int32Array</code>, <code>Uint32Array</code>, <code>Float32Array</code>, <code>Float64Array</code>,还有一种只针对Canvas颜色值的 <code>Uint8ClampedArray</code><br>
+阮老师的<a href="http://javascript.ruanyifeng.com/stdlib/arraybuffer.html" target="_blank" rel="noopener">二进制数组</a><br>
+MDN<a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/TypedArray" target="_blank" rel="noopener">TypedArray</a></p>
+<p>说实话，都看得我头皮发麻，因为这些api似乎日常并不怎么使用，但是由于是对内存块进行二进制操作，会极大的提升性能。似乎很多在线的图片编辑器会采用类似的api进行处理以保证性能😥</p>
+<h2><span id="函数的默认参数如何工作">函数的默认参数如何工作？</span></h2>
+<p>如果我们在调用 makeAPIRequest 函数时必须使用timeout的默认值，那么正确的语法是什么？<br>
+<img src="13.webp" alt><br>
+参考答案：传入<code>undefined</code>，因为满足使用默认参数的条件就是传入的值必须全等于<code>undefined</code></p>
+<h1><span id="javascript前端应用设计问题">JavaScript前端应用设计问题</span></h1>
+<p>这类问题相较于上面的较为开放，我选了几个觉的比较有意思的记录下</p>
+<h2><span id="http2-将如何影响-javascript-应用程序打包">HTTP/2 将如何影响 JavaScript 应用程序打包？</span></h2>
+<p>http/2的多路复用会使我们对资源的打包方式有所调整，比如对于首页需要并发较多静态资源请求的情况，我们可能会使用“域名分发”（这里先排除使用雪碧图的情况），但是引入http/2之后完全不用担心这个问题。多路复用在一个请求中可以响应多个资源，比如我们请求首页，它可以把<code>html</code>、<code>favorite.ico</code>、<code>css</code>、<code>js</code>等一并返回，极大的提高了网页的加载性能，应用google的一句话来描述</p>
+<blockquote>
+<p>HTTP/2 可以让我们的应用更快、更简单、更稳定 - 这几词凑到一块是很罕见的！<br>
+<a href="https://developers.google.com/web/fundamentals/performance/http2/?hl=zh-cn" target="_blank" rel="noopener">HTTP/2 简介</a></p>
+</blockquote>
+<h2><span id="fetch-api-相对于传统的-ajax-有哪些改进">Fetch API 相对于传统的 Ajax 有哪些改进？</span></h2>
+<p>改进：promise风格的api，async/await方式调用更友好，更简洁，错误处理更直观<br>
+缺点/难点：</p>
+<ul>
+<li>fetch 是一种底层的 api，json传值必须转换成字符串，并且设置content-Type为<code>application/json</code></li>
+<li>fetch 默认情况下不会发送 cookie</li>
+<li>无法获取progress，也就是说无法用fetch做出有进度条的请求</li>
+<li>不能中断，我们知道传统的xhr是可以通过调用abort方法来终止我们的请求的<br>
+其实javasript的社区一直很活跃，相信上述问题很快会在未来的更新中解决</li>
+</ul>
+<h1><span id="前端基础和理论问题">前端基础和理论问题</span></h1>
+<h2><span id="html-中-doctype-的用途是什么">HTML 中 Doctype 的用途是什么？</span></h2>
+<blockquote>
+<!DOCTYPE> 声明不是 HTML 标签；它是指示 web 浏览器关于页面使用哪个 HTML 版本进行编写的指令。 
+</blockquote>
+<h3><span id="doctype-不存在">Doctype 不存在。</span></h3>
+<p>⚠会触发混杂模式，如果在文档开始处没有发现文档类型声明，则所有浏览器都会默认开启混杂模式。混杂模式在不同浏览器下的行为差异非常大，如果不使用某些hack技术，跨浏览器的行为根本就没有一致性可言。</p>
+<h3><span id="使用了-html4-doctype但-html-页面使用了-html5-的标签如-或-它会导致任何错误吗">使用了 HTML4 Doctype，但 HTML 页面使用了 HTML5 的标签，如 <audio> 或 <video>。它会导致任何错误吗？</video></audio></span></h3>
+<p>据我观察似乎并没有出现什么问题，猜测是浏览器检测到<code>video</code>这种html5的标签，应该会以html的形式去解析文档了</p>
+<h3><span id="dom-和-bom-有什么区别">DOM 和 BOM 有什么区别？</span></h3>
+<blockquote>
+<p>DOM 全称是 Document Object Model，也就是文档对象模型。<br>
+我们可以把 HTML 看做一个对象树（DOM树），它的本身和里面的所有东西比如 <code>div</code> 标签都看做一个对象，每个对象又叫节点（node），然后有一套统一的api来操作这些内容，比如：</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">document</span>.getElementById(<span class="string">'root'</span>);</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>BOM 是 Browser Object Model，浏览器对象模型。<br>
+既然DOM是控制文档的，那BOM故名思意就是控制或访问浏览器的，比如我们经常使用的：</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">location.href = <span class="string">'https://google.com'</span>;</span><br></pre></td></tr></table></figure>
+<h2><span id="javascript-中的事件处理如何运行">JavaScript 中的事件处理如何运行？</span></h2>
+<p>如下图所示，我们有三个 div 元素。每个div都有一个与之关联的点击处理程序。处理程序执行以下任务：</p>
+<ul>
+<li>Outer div click处理程序将 hello outer打印到控制台。</li>
+<li>Inner div click处理程序将 hello inner 打印到控制台。</li>
+<li>Innermost div click 处理程序将 hello innermost 打印到控制台。<br>
+编写一段代码来分配这些任务，以便在单击innermost div 时始终打印以下序列？<br>
+hello inner → hello innermost → hello outer<br>
+<img src="3-3.webp" alt></li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">style</span>=<span class="string">"height: 400px;width: 600px;background: #34f34a"</span> <span class="attr">id</span>=<span class="string">"outer"</span>&gt;</span></span><br><span class="line">  Outer</span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span> <span class="attr">style</span>=<span class="string">"background: #de3456"</span> <span class="attr">id</span>=<span class="string">"inner"</span>&gt;</span></span><br><span class="line">    Inner</span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">style</span>=<span class="string">"background: #234c53"</span> <span class="attr">id</span>=<span class="string">"innermost"</span>&gt;</span></span><br><span class="line">      Innermost</span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">document</span>.getElementById(<span class="string">'outer'</span>).addEventListener(<span class="string">'click'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'hello outer'</span>)</span><br><span class="line">&#125;, <span class="literal">false</span>);</span><br><span class="line"><span class="built_in">document</span>.getElementById(<span class="string">'inner'</span>).addEventListener(<span class="string">'click'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'hello inner'</span>)</span><br><span class="line">&#125;, <span class="literal">true</span>);</span><br><span class="line"><span class="built_in">document</span>.getElementById(<span class="string">'innermost'</span>).addEventListener(<span class="string">'click'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'hello innermost'</span>)</span><br><span class="line">&#125;, <span class="literal">false</span>);</span><br></pre></td></tr></table></figure>
+<p>👆这里考察的就是事件的冒泡和事件捕获，inner元素需要事件捕获的形式绑定事件，才能达到先于innermost元素输出hello</p>
+<h2><span id="css-重排和重绘之间有什么区别">CSS 重排和重绘之间有什么区别？</span></h2>
+<p>要细讲重排重绘的话要延申到浏览器的渲染原理，我们这里直接简单说说什么是重排重绘，以及问题触发的时机</p>
+<ul>
+<li>需要重新分析并且节点尺寸需要重新计算。这被称为<strong>重排</strong></li>
+<li>由于节点的几何属性发生改变或者由于样式发生改变，例如改变元素背景色时，屏幕上的部分内容需要更新。这样的更新被称为<strong>重绘</strong>。<br>
+触发时机？<br>
+任何改变用来构建渲染树的信息都会导致一次重排或重绘。</li>
+<li>修改dom（包括删除、添加和更新）</li>
+<li>修改样式</li>
+<li>调整窗口大小，改变网页字号。</li>
+</ul>
+<blockquote>
+<p><strong>重绘</strong>不一定会触发<strong>重排</strong>，但是<strong>重排</strong>必定会导致<strong>重绘</strong><br>
+例如修改一个div的背景色，没有导致它的大小以及周围的元素位置变动，就只触发重绘，但是使它的<code>display: none</code>就会导致重排，因为它的“消失”会导致其他元素的位置变化<br>
+下面罗列一些导致重排的css样式</p>
+</blockquote>
+<ul>
+<li>display</li>
+<li>margin</li>
+<li>padding</li>
+<li>font-size</li>
+<li>width</li>
+<li>height<br>
+…<br>
+会导致重绘的css样式</li>
+<li>background-color</li>
+<li>color<br>
+…<br>
+总的来说，一般会导致布局变化的，都会触发重排，重排是非常消耗性能的，那么如何避免呢？</li>
+<li>改变类名而不是改变样式</li>
+<li>不要把读操作和写操作，放在一个语句里面（很多情况下样式的写操作之后，在读一些属性时，如：offsetTop，会让浏览器立即去重新渲染计算出你要的值）</li>
+<li>使用离线DOM，<a href="http://www.w3school.com.cn/xmldom/dom_documentfragment.asp" target="_blank" rel="noopener">Document Fragment</a>、或者在使用<code>document.cloneNode</code>方法创建的dom上去操作，完成后再去替换原先的<br>
+…<br>
+这一块阮老师写得很好：<a href="http://www.ruanyifeng.com/blog/2015/09/web-page-performance-in-depth.html" target="_blank" rel="noopener">网页性能管理详解</a></li>
+</ul>
+<h2><span id="什么是-css-选择器权重以及它如何工作">什么是 CSS 选择器权重以及它如何工作？</span></h2>
+<p>这一块大多数人关注的可能就是：important&gt; 内联样式 &gt; id &gt; class &gt; tag这种，但是其实每种写法都是有权重数值的，css的权重衡量应该是数值大小，而不是写法。下面是每个样式写法的权重值（这里我们不讨论<code>!important</code>，因为它无视这些规则😂）：</p>
+<table>
+<thead>
+<tr>
+<th>选择器</th>
+<th>权重</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>行内</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>id</td>
+<td>100</td>
+</tr>
+<tr>
+<td>class</td>
+<td>10</td>
+</tr>
+<tr>
+<td>tag</td>
+<td>1</td>
+</tr>
+<tr>
+<td>属性</td>
+<td>10</td>
+</tr>
+<tr>
+<td>*（通配符）</td>
+<td>0</td>
+</tr>
+<tr>
+<td>伪类</td>
+<td>10</td>
+</tr>
+<tr>
+<td>伪元素</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>所以一个css样式的权重应该由权重数值计算而来，举个例子：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">p</span><span class="selector-id">#title</span> &#123;</span><br><span class="line">  <span class="attribute">color</span>: <span class="number">#fff</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>👆上面这个样式的权重应该是1 + 100</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">p</span><span class="selector-class">.title</span> &#123;</span><br><span class="line">  <span class="attribute">color</span>: <span class="number">#000</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>而这一个为1 + 10，生效的颜色应该是#fff</p>
+<h2><span id="css中的pixel与硬件物理中的pixel有何不同">CSS中的pixel与硬件/物理中的pixel有何不同？</span></h2>
+<p>css中的pixel是一个相对值，基本都是浏览器根据设备像素换算得来的。硬件中的pixel密度如果较高，默认情况下一个设备的pixel可能会是css的1.5倍，或者2两倍，甚至有些会达到4倍。具体详细的解释看<a href="https://github.com/jawil/blog/issues/21" target="_blank" rel="noopener">这里</a></p>
+<h2><span id="什么时候应该使用-css-animations而不是-css-transitions你做出这个决定标准是什么">什么时候应该使用 CSS animations而不是 CSS transitions？你做出这个决定标准是什么？</span></h2>
+<p>我使用<code>animations</code>会有一下几种情况，除此之外可能会用<code>transitions</code></p>
+<ul>
+<li>动画较为复杂，并且有多个阶段因为key-frame可以定义从0%到100%</li>
+<li>需要重复播放</li>
+<li>可能需要倒放</li>
+<li>需要暂停并继续</li>
+</ul>
+<h2><span id="如果你正在-review-css-代码那么你在代码中经常遇到的问题是什么">如果你正在 Review CSS 代码，那么你在代码中经常遇到的问题是什么？</span></h2>
+<ul>
+<li>过深的嵌套</li>
+<li>不合理的属性书写顺序</li>
+<li>不关注文件大小，书写过多冗余的样式</li>
+<li>值简写</li>
+<li>不够规范的命名</li>
+</ul>
+
+
+                <hr>
+                <!-- JiaThis Button BEGIN -->
+                <!-- <div class="jiathis_style_24x24">
+                    <a class="jiathis_button_weixin"></a>
+                    <a class="jiathis_button_qzone"></a>
+                    <a class="jiathis_button_tsina"></a>
+                    <a class="jiathis_button_cqq"></a>
+                    <a class="jiathis_button_fb"></a>
+                    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+                </div>
+                <script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>-->
+                <!-- JiaThis Button END -->
+                <!-- Pager -->
+                <ul class="pager clearfix">
+                    
+                        <li class="previous">
+                            <a href="/2019/02/20/react-hoc-reverse-extend/" data-toggle="tooltip" data-placement="top" title="React高阶组件之反向继承">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/10/21/new-web-components/" data-toggle="tooltip" data-placement="top" title="不一样的Web Components——Shadow DOM">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+
+                <!-- UY BEGIN -->
+                <br>
+                <div id="uyan_frame"></div>
+                <!--<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2138668"></script>-->
+                <!-- UY END -->
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      <aside id="sidebar">
+        <div id="toc" class="toc-article">
+        <strong class="toc-title">Contents</strong>
+        
+          <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">基本的JavaScript问题</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">1.1.</span> <span class="toc-nav-text">使以下代码正常运行：</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">1.2.</span> <span class="toc-nav-text">以下代码在 JavaScript 中返回false。 请说明为什么</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">1.3.</span> <span class="toc-nav-text">解决以下异步代码问题。</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">1.4.</span> <span class="toc-nav-text">使用 JavaScript Proxy实现简单的数据绑定</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">1.5.</span> <span class="toc-nav-text">解释 JavaScript 并发模型</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">1.6.</span> <span class="toc-nav-text">“new” 关键字在 JavaScript 中有什么作用？</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">1.7.</span> <span class="toc-nav-text">JavaScript 中有哪些不同的函数调用模式？ 详细解释。</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">1.8.</span> <span class="toc-nav-text">解释即将发布的任一新 ECMAScript 提案。</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">1.9.</span> <span class="toc-nav-text">JavaScript 中的迭代器（iterators）和迭代（iterables）是什么？ 你知道什么是内置迭代器吗？</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">1.10.</span> <span class="toc-nav-text">如何在 JSON 中序列化以下对象？</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">1.11.</span> <span class="toc-nav-text">你熟悉 Typed Arrays 吗？ 如果熟悉，请解释他们与 JavaScript 中的传统数组相比的异同？</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">1.12.</span> <span class="toc-nav-text">函数的默认参数如何工作？</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">JavaScript前端应用设计问题</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">2.1.</span> <span class="toc-nav-text">HTTP/2 将如何影响 JavaScript 应用程序打包？</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">2.2.</span> <span class="toc-nav-text">Fetch API 相对于传统的 Ajax 有哪些改进？</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">前端基础和理论问题</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">3.1.</span> <span class="toc-nav-text">HTML 中 Doctype 的用途是什么？</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">3.1.1.</span> <span class="toc-nav-text">Doctype 不存在。</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">3.1.2.</span> <span class="toc-nav-text">使用了 HTML4 Doctype，但 HTML 页面使用了 HTML5 的标签，如  或 。它会导致任何错误吗？</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">3.1.3.</span> <span class="toc-nav-text">DOM 和 BOM 有什么区别？</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">3.2.</span> <span class="toc-nav-text">JavaScript 中的事件处理如何运行？</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">3.3.</span> <span class="toc-nav-text">CSS 重排和重绘之间有什么区别？</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">3.4.</span> <span class="toc-nav-text">什么是 CSS 选择器权重以及它如何工作？</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">3.5.</span> <span class="toc-nav-text">CSS中的pixel与硬件/物理中的pixel有何不同？</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">3.6.</span> <span class="toc-nav-text">什么时候应该使用 CSS animations而不是 CSS transitions？你做出这个决定标准是什么？</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#null"><span class="toc-nav-number">3.7.</span> <span class="toc-nav-text">如果你正在 Review CSS 代码，那么你在代码中经常遇到的问题是什么？</span></a></li></ol></li></ol>
+        
+        </div>
+      </aside>
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#面试" title="面试">面试</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+                    <li>
+                        <a target="_blank" href="http://weibo.com/2539035205">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/Ryuurock">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a href="mailto:lwx_1993@outlook.com">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Wanxiang Long(Ryuurock) &copy; 1993-2019 
+                    <br>
+                    <span id="busuanzi_container_site_uv">小站访客数<span id="busuanzi_value_site_uv"></span>人次</span>
+                    |
+                    <span id="busuanzi_container_site_pv">小站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/lx-blog.js"></script>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+	<a id="rocket" href="#top" class="iconfont icon-23435"></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+<!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
