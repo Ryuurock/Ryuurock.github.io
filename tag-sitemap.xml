@@ -16,13 +16,6 @@
     </url>
 
     <url>
-        <loc>https://ryuurock.com/tags/ES5/</loc>
-        <lastmod>2019-10-17T02:59:03.597Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.2</priority>
-    </url>
-
-    <url>
         <loc>https://ryuurock.com/tags/%E8%AE%A2%E9%98%85%E8%80%85%E6%A8%A1%E5%BC%8F/</loc>
         <lastmod>2019-10-17T02:59:03.597Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -38,6 +31,13 @@
 
     <url>
         <loc>https://ryuurock.com/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/</loc>
+        <lastmod>2019-10-17T02:59:03.597Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://ryuurock.com/tags/ES5/</loc>
         <lastmod>2019-10-17T02:59:03.597Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
@@ -65,6 +65,13 @@
     </url>
 
     <url>
+        <loc>https://ryuurock.com/tags/%E8%B7%A8%E5%9F%9F/</loc>
+        <lastmod>2019-10-17T02:59:03.615Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
         <loc>https://ryuurock.com/tags/chrome/</loc>
         <lastmod>2019-10-17T02:59:03.615Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -73,13 +80,6 @@
 
     <url>
         <loc>https://ryuurock.com/tags/puppeteer/</loc>
-        <lastmod>2019-10-17T02:59:03.615Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.2</priority>
-    </url>
-
-    <url>
-        <loc>https://ryuurock.com/tags/%E8%B7%A8%E5%9F%9F/</loc>
         <lastmod>2019-10-17T02:59:03.615Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
@@ -114,6 +114,13 @@
     </url>
 
     <url>
+        <loc>https://ryuurock.com/tags/gulp/</loc>
+        <lastmod>2019-10-17T02:59:03.619Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
         <loc>https://ryuurock.com/tags/jquery/</loc>
         <lastmod>2019-10-17T02:59:03.619Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -122,13 +129,6 @@
 
     <url>
         <loc>https://ryuurock.com/tags/ajax/</loc>
-        <lastmod>2019-10-17T02:59:03.619Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.2</priority>
-    </url>
-
-    <url>
-        <loc>https://ryuurock.com/tags/gulp/</loc>
         <lastmod>2019-10-17T02:59:03.619Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
@@ -170,6 +170,13 @@
     </url>
 
     <url>
+        <loc>https://ryuurock.com/tags/nginx/</loc>
+        <lastmod>2019-10-17T02:59:03.648Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
         <loc>https://ryuurock.com/tags/websocket/</loc>
         <lastmod>2019-10-17T02:59:03.648Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -184,20 +191,6 @@
     </url>
 
     <url>
-        <loc>https://ryuurock.com/tags/nginx/</loc>
-        <lastmod>2019-10-17T02:59:03.648Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.2</priority>
-    </url>
-
-    <url>
-        <loc>https://ryuurock.com/tags/react/</loc>
-        <lastmod>2019-10-17T02:59:03.649Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.2</priority>
-    </url>
-
-    <url>
         <loc>https://ryuurock.com/tags/headless/</loc>
         <lastmod>2019-10-17T02:59:03.649Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -206,6 +199,13 @@
 
     <url>
         <loc>https://ryuurock.com/tags/nodejs/</loc>
+        <lastmod>2019-10-17T02:59:03.649Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://ryuurock.com/tags/react/</loc>
         <lastmod>2019-10-17T02:59:03.649Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
