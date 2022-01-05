@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="baidu-site-verification" content="code-Hn2FTkozwu" />
+  <meta name="google-site-verification" content="VRegEMvasrnJoWUYvftfL9jaiIF1ovA-dZPb4juzyCA" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="keyword" content="Web前端|前端|javascript|css|html|html5">
+  <link rel="icon" href="/favicon.ico">
+  <!-- Place this tag in your head or just before your close body tag. -->
+  <title>
+    
+    longwanxiang的博客 | Ryuurock | Web前端实习生
+    
+  </title>
+  <link rel="canonical" href="https://ryuurock.github.io/archives/3/">
+  <!-- Custom Fonts -->
+  <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+  <!-- Hux change font-awesome CDN to qiniu -->
+  <link href="//cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <!-- Bootstrap Core CSS -->
+  
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+  <!-- Custom CSS -->
+  
+<link rel="stylesheet" href="/css/beantech.min.css">
+
+  <!-- Pygments Highlight CSS -->
+  
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+<link rel="stylesheet" href="/css/widget.css">
+
+  
+<link rel="stylesheet" href="/css/rocket.css">
+
+  
+<link rel="stylesheet" href="/css/signature.css">
+
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  <link rel="stylesheet" type="text/css" href="//at.alicdn.com/t/font_qt49r5gb9r8b0529.css">
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+
+<body ontouchstart="">
+    <!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+  header.intro-header{
+    
+      /* background-image: url('/covers/home/201291116105179148.jpg')  */
+      /*config*/
+    
+  }
+  
+</style>
+
+<header class="intro-header" >
+  <!-- Signature -->
+  <div id="signature">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        
+          <div class="site-heading">
+            <h1>Longwx Blog</h1>
+            <!--<hr class="small">-->
+            <span class="subheading">有一天就是今天，今天就是有一天</span>
+          </div>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <iframe style="position: absolute;top: 0;left: 0;" class="home_background" src="/libs/webGL/jq22-code7.html" frameborder="0" width="100%" height="100%"></iframe>
+  
+</header>
+
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header page-scroll">
+      <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Longwx Blog</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+    <div id="huxblog_navbar">
+      <div class="navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="/">Home</a></li>
+          <li><a href="/about/">About</a></li><li><a href="/archive/">Archives</a></li><li><a href="/tags/">Tags</a></li></ul>
+      </div>
+    </div>
+    <!-- /.navbar-collapse -->
+  </div>
+  <!-- /.container -->
+</nav>
+<script>
+  // Drop Bootstarp low-performance Navbar
+  // Use customize navbar with high-quality material design animation
+  // in high-perf jank-free CSS3 implementation
+  var $body = document.body;
+  var $toggle = document.querySelector('.navbar-toggle');
+  var $navbar = document.querySelector('#huxblog_navbar');
+  var $collapse = document.querySelector('.navbar-collapse');
+
+  $toggle.addEventListener('click', handleMagic)
+
+  function handleMagic(e) {
+    if ($navbar.className.indexOf('in') > 0) {
+      // CLOSE
+      $navbar.className = " ";
+      // wait until animation end.
+      setTimeout(function () {
+        // prevent frequently toggle
+        if ($navbar.className.indexOf('in') < 0) {
+          $collapse.style.height = "0px"
+        }
+      }, 400)
+    } else {
+      // OPEN
+      $collapse.style.height = "auto"
+      $navbar.className += " in";
+    }
+  }
+</script>
+
+
+    <!-- Main Content -->
+<div class="container">
+    <div class="row">
+        
+
+<!-- USE SIDEBAR -->
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-1
+                col-md-8 col-md-offset-1
+                col-sm-12
+                col-xs-12
+                post-container
+            ">
+            
+                <!-- Main Content -->
+
+
+<div class="post-preview">
+  <a href="/2017/09/12/page-parallel-execute/">
+    <h2 class="post-title">
+      解决Websocket并发执行的问题
+    </h2>
+    <h3 class="post-subtitle">
+      setTimeout也算能线救国
+    </h3>
+    <div class="post-content-preview">
+      在解决掉这个问题之前，我都有点想放弃了，因为尝试的方法都不行，照惯例先来描述下问题吧。
+
+为了能在所有页面能接收到服务器给用户发起的通知，所以我们在每个页面建立了websocket长连接来监听服务器的动静，那么问题来了，如果我开启了两个，三个甚至四个标签页，那效果你能猜到：刷刷刷一排通知烦到你直接关了通知功能。
+
+标签页之间的通信，我了解到的目前就两种
+
+通过window.opener.wi......
+    </div>
+  </a>
+  
+  <p class="post-meta" style="margin: 10px 0;">
+    Posted by Wanxiang Long(Ryuurock) on
+    2017-09-12
+  </p>
+  <div class="tags">
+    
+    <a href="/tags/#websocket" title="websocket">websocket</a>
+    
+    <a href="/tags/#并发" title="并发">并发</a>
+    
+  </div>
+  
+
+</div>
+<hr>
+
+<div class="post-preview">
+  <a href="/2017/09/04/Observer/">
+    <h2 class="post-title">
+      使用观察者模式（发布-订阅模式）对抽象组件与业务组件进行解耦
+    </h2>
+    <h3 class="post-subtitle">
+      
+    </h3>
+    <div class="post-content-preview">
+      最近在重构一处功能，发现抽象组件居然依赖了业务组件的代码，从window作用域call了业务组件提供的方法，这里的强耦合让我强迫症又犯了，本着每天进步一点点的原则，毅然决然的进行解耦合。
+我们在学习面向对象的时候，有一条设计原则叫依赖倒置原则：
+
+
+A.高层次的模块不应该依赖于低层次的模块，他们都应该依赖于抽象。
+B.抽象不应该依赖于具体实现，具体实现应该依赖于抽象。
+
+
+其实用通俗点的话来......
+    </div>
+  </a>
+  
+  <p class="post-meta" style="margin: 10px 0;">
+    Posted by Wanxiang Long(Ryuurock) on
+    2017-09-04
+  </p>
+  <div class="tags">
+    
+    <a href="/tags/#订阅者模式" title="订阅者模式">订阅者模式</a>
+    
+    <a href="/tags/#Observer" title="Observer">Observer</a>
+    
+    <a href="/tags/#设计模式" title="设计模式">设计模式</a>
+    
+  </div>
+  
+
+</div>
+<hr>
+
+<div class="post-preview">
+  <a href="/2017/08/17/vue-muilt-page-config/">
+    <h2 class="post-title">
+      多页、多入口、前后端耦合的webpack配置
+    </h2>
+    <h3 class="post-subtitle">
+      
+    </h3>
+    <div class="post-content-preview">
+      webpack的流行给前端开发减少了许多不必要的工作，webpack可以让我们更纯粹的关注我们的代码，但是很多人认为它更适合单页应用，主要有以下一些痛点
+
+如果模板是后台管理的生成的怎么办
+我目前没有使用任何模块化的开发方式，或使用了模块加载器（如seajs、requireJs等）
+
+其实第二点我已经在上篇文章中讲过了，如果平滑的过渡到webpack，痛点一也解释过，只是没有详细的说明，此次......
+    </div>
+  </a>
+  
+  <p class="post-meta" style="margin: 10px 0;">
+    Posted by Wanxiang Long(Ryuurock) on
+    2017-08-17
+  </p>
+  <div class="tags">
+    
+    <a href="/tags/#webpack" title="webpack">webpack</a>
+    
+    <a href="/tags/#vuejs" title="vuejs">vuejs</a>
+    
+  </div>
+  
+
+</div>
+<hr>
+
+<div class="post-preview">
+  <a href="/2017/07/22/new-front-end/">
+    <h2 class="post-title">
+      记前端从“刀耕火种”过渡到到“现代化”的自动构建工具
+    </h2>
+    <h3 class="post-subtitle">
+      从r.js优化器到webpack构建工具的无痛迁移，需要做哪些工作
+    </h3>
+    <div class="post-content-preview">
+      博主是14年入的程序员大军，当时主java兼具前端开发的活儿，在现在看来的一些流开发框架和新兴思想，早在node.js开始进入大家视野的时候就流行起来了，只是在那时博主并没有关注前端的生态圈（然而java好像也并没有关注，逃），所以还是处在很多人所描述的刀耕火种的阶段，前端代码全部挂载到全局作用域，包括插件导出的变量。那更别提组件化和模块化的编程思想了，甚至代码都不用压缩优化就直接上传到服务......
+    </div>
+  </a>
+  
+  <p class="post-meta" style="margin: 10px 0;">
+    Posted by Wanxiang Long(Ryuurock) on
+    2017-07-22
+  </p>
+  <div class="tags">
+    
+    <a href="/tags/#javascript" title="javascript">javascript</a>
+    
+    <a href="/tags/#webpack" title="webpack">webpack</a>
+    
+    <a href="/tags/#AMD CMD" title="AMD CMD">AMD CMD</a>
+    
+  </div>
+  
+
+</div>
+<hr>
+
+<div class="post-preview">
+  <a href="/2017/07/12/ajax-promise/">
+    <h2 class="post-title">
+      如何保证ajax按你想要的顺序执行？
+    </h2>
+    <h3 class="post-subtitle">
+      回调回调回调回调。。。。。flag、flag、flag、flag、flag...
+    </h3>
+    <div class="post-content-preview">
+      前端的蓬勃发展和要求越来越高的用户体验，使得现在的web页面越来越依赖ajax，无处不在的ajax，无处不在的回调，使得你的代码越写越丑，还容易陷入回调地狱，比如这样：
+123456789101112131415161718192021222324$.get(&#x27;/test&#x27;, function() &#123;    // do something  $.get(&#x2......
+    </div>
+  </a>
+  
+  <p class="post-meta" style="margin: 10px 0;">
+    Posted by Wanxiang Long(Ryuurock) on
+    2017-07-12
+  </p>
+  <div class="tags">
+    
+    <a href="/tags/#Promise" title="Promise">Promise</a>
+    
+    <a href="/tags/#async await" title="async await">async await</a>
+    
+  </div>
+  
+
+</div>
+<hr>
+
+<div class="post-preview">
+  <a href="/2017/06/27/cross-domain/">
+    <h2 class="post-title">
+      关于javascript的跨域问题的几种解决办法
+    </h2>
+    <h3 class="post-subtitle">
+      
+    </h3>
+    <div class="post-content-preview">
+      要说跨域，那得先来认识什么是跨域，以下内容摘自网络
+
+总而言之就是浏览器厂商为了web安全，使得不同域名的网页之间，无法通信，在博主的web开发历程中，主要遇到的是以下几种跨域的情况。
+
+web api访问时
+iframe与父页面或顶层页面之间资源访问时
+访问opener时
+
+一般解决跨域问题可以从两个维度来解决
+
+web前端通过一些技巧来解决
+后端的服务器解决
+
+通过前端手段解决
+通过前端......
+    </div>
+  </a>
+  
+  <p class="post-meta" style="margin: 10px 0;">
+    Posted by Wanxiang Long(Ryuurock) on
+    2017-06-27
+  </p>
+  <div class="tags">
+    
+    <a href="/tags/#javascript" title="javascript">javascript</a>
+    
+    <a href="/tags/#跨域" title="跨域">跨域</a>
+    
+  </div>
+  
+
+</div>
+<hr>
+
+<div class="post-preview">
+  <a href="/2017/06/21/jQuery-pulgin-retract/">
+    <h2 class="post-title">
+      基于jQuery的轻量图片排版插件
+    </h2>
+    <h3 class="post-subtitle">
+      一个轻量的图片排版插件
+    </h3>
+    <div class="post-content-preview">
+      之前因为公司项目需要，一个页面图片挺多的，并且图片的分辨率完全随机，这就对页面排版要求挺高的，目前最流行的解决方案就是使用纵向瀑布流。但是因为图片加载都是异步的，js插件在获取图片容器宽高时往往得到的都是还没完全加载的值，导致并不能达到需求要的效果。于是便抽业余时间写了这个插件，虽然最后因为种种原因没有用到这个插件，但是毕竟是自己付之劳动的成果于是就作了个记录 话不多说 直接上效果图
+
+效果......
+    </div>
+  </a>
+  
+  <p class="post-meta" style="margin: 10px 0;">
+    Posted by Wanxiang Long(Ryuurock) on
+    2017-06-21
+  </p>
+  <div class="tags">
+    
+    <a href="/tags/#javascript" title="javascript">javascript</a>
+    
+    <a href="/tags/#jQuery plugin" title="jQuery plugin">jQuery plugin</a>
+    
+  </div>
+  
+
+</div>
+<hr>
+
+<div class="post-preview">
+  <a href="/2017/06/19/jQuery-ajax-intercept/">
+    <h2 class="post-title">
+      jQuery的ajax方法拦截器
+    </h2>
+    <h3 class="post-subtitle">
+      
+    </h3>
+    <div class="post-content-preview">
+      之前因为一些原因，担任过一段时间公司的前端开发面试官，面试了很多人，问过这样两个问题：
+
+如何侵入一个方法实现代理（或者叫钩子）？// 2017年10月15日修正，这里应该叫装饰器或者装饰者
+
+
+在不修改页面业务代码只修改一处代码的情况下，如何统一处理jQuery的ajax的response数据？
+
+其实上面两个问题本质是差不多的，不过不知道是表述不清楚，还是web前端这一块的人水平确实参差......
+    </div>
+  </a>
+  
+  <p class="post-meta" style="margin: 10px 0;">
+    Posted by Wanxiang Long(Ryuurock) on
+    2017-06-19
+  </p>
+  <div class="tags">
+    
+    <a href="/tags/#jquery" title="jquery">jquery</a>
+    
+    <a href="/tags/#ajax" title="ajax">ajax</a>
+    
+  </div>
+  
+
+</div>
+<hr>
+
+<div class="post-preview">
+  <a href="/2017/06/19/mousewheel-bubble/">
+    <h2 class="post-title">
+      如何完美阻止浏览器的滚动事件向上冒泡
+    </h2>
+    <h3 class="post-subtitle">
+      
+    </h3>
+    <div class="post-content-preview">
+      我们都知道，浏览器的事件一般是从元素的一层一层网上冒泡的(document.addEventListener方法的第三个参数设置为true则是冒泡, false则是捕获)，鼠标的滚轮事件也不例外，当某个滚动区域的内容滚动到最底部时，则会往上走，找到最近的父元素，继续滚动。在某些时候这是个很不错的设定，但是当页面的可滚动区域过多的时候，便会造成不好的用户体验。给人以“到处都在动”的感觉，可能你......
+    </div>
+  </a>
+  
+  <p class="post-meta" style="margin: 10px 0;">
+    Posted by Wanxiang Long(Ryuurock) on
+    2017-06-19
+  </p>
+  <div class="tags">
+    
+    <a href="/tags/#javascript" title="javascript">javascript</a>
+    
+    <a href="/tags/#事件" title="事件">事件</a>
+    
+  </div>
+  
+
+</div>
+<hr>
+
+
+<!-- Pager -->
+<ul class="pager">
+  
+  <li class="previous">
+    <a href="/archives/2/">&larr; Newer Posts</a>
+  </li>
+  
+  
+</ul>
+
+
+                <!-- 如果开启评论功能 -->
+                
+            </div>
+
+          <!-- Sidebar Container -->
+<div class="
+    col-lg-3 col-lg-offset-0
+    col-md-3 col-md-offset-0
+    col-sm-12
+    col-xs-12
+    sidebar-container
+">
+  
+  <!-- Featured Tags -->
+
+<section>
+  <!-- no hr -->
+  <h5><a href="/tags/">FEATURED TAGS</a></h5>
+  <div class="tags">
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <a href="/tags/#headless" title="headless"
+      rel="2">headless</a>
+    
+    
+    
+    
+    
+    
+    
+    <a href="/tags/#javascript" title="javascript"
+      rel="5">javascript</a>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <a href="/tags/#webpack" title="webpack"
+      rel="3">webpack</a>
+    
+    
+    
+    <a href="/tags/#nodejs" title="nodejs"
+      rel="3">nodejs</a>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <a href="/tags/#scratch" title="scratch"
+      rel="2">scratch</a>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <a href="/tags/#websocket" title="websocket"
+      rel="2">websocket</a>
+    
+    
+    
+    
+    
+    
+    
+    
+  </div>
+</section>
+
+
+  <hr>
+  
+  <!-- Short About -->
+<section class="visible-md visible-lg">
+  <h5><a href="/about/">ABOUT ME</a></h5>
+  <div class="short-about">
+
+    
+    <img id="avatar_pic" src="/covers/common/userface.jpg" />
+    
+
+    
+    <p>Hi, I&#39;m Ryuurock</p>
+    
+
+    <!-- SNS Link -->
+    <ul class="list-inline">
+      
+      
+      
+
+      
+      <li>
+        <a target="_blank" href="http://weibo.com/2539035205">
+          <span class="fa-stack fa-lg">
+            <i class="fa fa-circle fa-stack-2x"></i>
+            <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+          </span>
+        </a>
+      </li>
+      
+
+      
+
+      
+      <li>
+        <a target="_blank" href="https://github.com/Ryuurock">
+          <span class="fa-stack fa-lg">
+            <i class="fa fa-circle fa-stack-2x"></i>
+            <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+          </span>
+        </a>
+      </li>
+      
+
+
+      
+
+      
+      <li>
+        <a href="mailto:lwx_1993@outlook.com">
+          <span class="fa-stack fa-lg">
+            <i class="fa fa-circle fa-stack-2x"></i>
+            <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+          </span>
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+</section>
+
+  <hr>
+  
+  
+  <h5>RECENT POSTS</h3>
+  <div class="widget">
+    <ul>
+      <li>
+        <a href="/2021/12/27/web-load-performance-optimization/">再谈 web 加载性能优化——字体裁剪</a>
+      </li>
+    
+      <li>
+        <a href="/2021/12/01/micro-front-scratch-extensions/">scratch 应用体积优化之——微前端化 scratch extensions</a>
+      </li>
+    
+      <li>
+        <a href="/2021/03/14/scratch/">Scratch 漫谈</a>
+      </li>
+    
+      <li>
+        <a href="/2019/11/15/blockly/">blockly初探</a>
+      </li>
+    
+      <li>
+        <a href="/2019/02/20/react-hoc-reverse-extend/">React高阶组件之反向继承</a>
+      </li>
+    </ul>
+  </div>
+
+
+  <hr>
+  
+</div>
+
+
+        
+    </div>
+</div>
+
+
+    <!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center">
+          
+          
+          
+
+          
+          <li>
+            <a target="_blank" href="http://weibo.com/2539035205">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a target="_blank" href="https://github.com/Ryuurock">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a href="mailto:lwx_1993@outlook.com">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+        </ul>
+        <p class="copyright text-muted">
+          Wanxiang Long(Ryuurock) &copy; 1993-2022
+          <br>
+          <span id="busuanzi_container_site_uv">小站访客数<span id="busuanzi_value_site_uv"></span>人次</span>
+          |
+          <span id="busuanzi_container_site_pv">小站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/lx-blog.js"></script>
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- async load function -->
+<script>
+  function async (u, c) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) {
+      o.addEventListener('load', function (e) {
+        c(null, e);
+      }, false);
+    }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+  // only load tagcloud.js in tag.html
+  if ($('#tag_cloud').length !== 0) {
+    async ("/js/jquery.tagcloud.js", function () {
+      $.fn.tagcloud.defaults = {
+        //size: {start: 1, end: 1, unit: 'em'},
+        color: {
+          start: '#bbbbee',
+          end: '#0085a1'
+        },
+      };
+      $('#tag_cloud a').tagcloud();
+    })
+  }
+</script>
+
+<!--fastClick.js -->
+<script>
+  async ("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    var $nav = document.querySelector("nav");
+    if ($nav) FastClick.attach($nav);
+  })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+    <a id="rocket" href="#top" class="iconfont icon-23435"></a>
+    <script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+    <!-- Image to hack wechat -->
+    <!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+    <!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

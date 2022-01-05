@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="baidu-site-verification" content="code-Hn2FTkozwu" />
+  <meta name="google-site-verification" content="VRegEMvasrnJoWUYvftfL9jaiIF1ovA-dZPb4juzyCA" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="keyword" content="Web前端|前端|javascript|css|html|html5">
+  <link rel="icon" href="/favicon.ico">
+  <!-- Place this tag in your head or just before your close body tag. -->
+  <title>
+    
+    再谈 web 加载性能优化——字体裁剪 - longwanxiang的博客 | Ryuurock | Web前端实习生
+    
+  </title>
+  <link rel="canonical" href="https://ryuurock.github.io/2021/12/27/web-load-performance-optimization/">
+  <!-- Custom Fonts -->
+  <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+  <!-- Hux change font-awesome CDN to qiniu -->
+  <link href="//cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <!-- Bootstrap Core CSS -->
+  
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+  <!-- Custom CSS -->
+  
+<link rel="stylesheet" href="/css/beantech.min.css">
+
+  <!-- Pygments Highlight CSS -->
+  
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+<link rel="stylesheet" href="/css/widget.css">
+
+  
+<link rel="stylesheet" href="/css/rocket.css">
+
+  
+<link rel="stylesheet" href="/css/signature.css">
+
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  <link rel="stylesheet" type="text/css" href="//at.alicdn.com/t/font_qt49r5gb9r8b0529.css">
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+
+<body ontouchstart="">
+    <!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+  header.intro-header{
+    
+      background-image: url('/covers/post/WX20211227-152522@2x.png')
+      /*post*/
+    
+  }
+  
+</style>
+
+<header class="intro-header" >
+  <!-- Signature -->
+  <div id="signature">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        
+          <div class="post-heading">
+            <div class="tags">
+                
+            </div>
+            <h1>再谈 web 加载性能优化——字体裁剪</h1>
+            <h2 class="subheading"></h2>
+            <span class="meta">
+                Posted by Wanxiang Long(Ryuurock) on
+                2021-12-27
+            </span>
+          </div>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</header>
+
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header page-scroll">
+      <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Longwx Blog</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+    <div id="huxblog_navbar">
+      <div class="navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="/">Home</a></li>
+          <li><a href="/about/">About</a></li><li><a href="/archive/">Archives</a></li><li><a href="/tags/">Tags</a></li></ul>
+      </div>
+    </div>
+    <!-- /.navbar-collapse -->
+  </div>
+  <!-- /.container -->
+</nav>
+<script>
+  // Drop Bootstarp low-performance Navbar
+  // Use customize navbar with high-quality material design animation
+  // in high-perf jank-free CSS3 implementation
+  var $body = document.body;
+  var $toggle = document.querySelector('.navbar-toggle');
+  var $navbar = document.querySelector('#huxblog_navbar');
+  var $collapse = document.querySelector('.navbar-collapse');
+
+  $toggle.addEventListener('click', handleMagic)
+
+  function handleMagic(e) {
+    if ($navbar.className.indexOf('in') > 0) {
+      // CLOSE
+      $navbar.className = " ";
+      // wait until animation end.
+      setTimeout(function () {
+        // prevent frequently toggle
+        if ($navbar.className.indexOf('in') < 0) {
+          $collapse.style.height = "0px"
+        }
+      }, 400)
+    } else {
+      // OPEN
+      $collapse.style.height = "auto"
+      $navbar.className += " in";
+    }
+  }
+</script>
+
+
+    <!-- Modify by Yu-Hsuan Yen -->
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>为什么要说再谈呢，顶着强烈“羞耻感”翻了翻以前写的文章，发现居然有 <a href="/2018/02/27/front-end-focus/#%E4%BC%98%E5%8C%96%E7%AF%87">前端疑难问题整理-优化篇</a>。里面好多手段这么多年过去了，依旧非常实用，甚至有些直接手段都被框架内置了。如：<code>nextjs</code>提供的 Image 组件拥有开箱即用的优化手段：</p>
+<ul>
+<li>默认的懒加载（即图片在视口外不加载图片）</li>
+<li>内置的图片高保真压缩能力</li>
+<li>响应式图片尺寸</li>
+<li>根据 ua 返回不同格式的图片（如 webp）</li>
+</ul>
+<p>最近接到了做公司官网 SEO 优化的需求，排在第一位的任务则是“提升整站的加载速度”。并提供了充足的证据证明访问确实很慢——<a target="_blank" rel="noopener" href="https://pagespeed.web.dev/">https://pagespeed.web.dev/</a> 的手机跑分只有 <code>20</code> 多分。经过一顿优化，分数来到了惊人的 <code>60</code> 分左右。</p>
+<blockquote>
+<p>分数这么低我猜测主要是 light house 的移动端模式采用了 4x 慢速的cpu，加上本就是免费的服务机器的CPU性能比较一般，所以通常首屏有图的网页跑分都比较拉胯。参考业界标杆<code>苹果官网</code>也就 50 多分。</p>
+</blockquote>
+<p>既然这个分数是一个可量化网站加载速度的指标，那么我们就直接面向跑分优化。</p>
+<p>这里有几个术语，<code>FCP</code>（First Contentful Paint）、<code>LCP</code>（Largest Contentful Paint）和 <code>Time to Interactive</code>。这几个指标在light house 跑分中占了较高的比重，我们也主要是面向这几个指标做优化。</p>
+<p>因为我们用的是 nextjs，SSR 会直接以最快的速度将html扔给浏览器，然后再开始请求其他的资源 css js等。相较于传统的 CSR，前者减少了js下载、解析、执行的时间，这个时间可能会达到秒级。</p>
+<h2 id="开始查找大文件"><a class="anchorjs-link" href="#开始查找大文件"></a>开始查找大文件</h2>
+<p>大文件是影响网页加载速度的罪魁祸首，占用了带宽则可能导致其后面的css和js一直排队。按下F12，勾上 disable cache，刷新页面，将 size 那列倒序排列，可以看到最大的文件是哪个。公司的官网图片是最多的，行业的原因设计上还有一些个性化的字体，<code>1.7MB</code> 的 <code>.woff2</code> 赫然出现在第一位，其次则是 <code>google analytics</code> 等第三方 SDK，以及一些首屏必须的大图了。由于都使用了 next 的 Image 组件，由于图片的优化空间已经非常小了，所以我们本次优化的主要目标还是在字体的裁剪。</p>
+<h2 id="寻找工具"><a class="anchorjs-link" href="#寻找工具"></a>寻找工具</h2>
+<p>字体文件应该是一个字符集合，里面包含了常用文字、字母和符号等等，网站没有用到的字符字母和符号等，理论上就可以从这个集合里踢出去。解决办法找到了，然后就是找能够处理这个问题的工具：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://fonttools.readthedocs.io/en/latest/">fonttools</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/aui/font-spider/">font-spider</a></li>
+<li><a target="_blank" rel="noopener" href="http://ecomfe.github.io/fontmin/">fontmin</a></li>
+</ul>
+<p><code>fonttools</code>是我一开始就找到的工具，字体子集化是它的一项小功能，试用之后非常符合我的要求，也没有发现什么bug，但是它是python开发的，只能用 nodejs 的子进程运行启动，它本身也有依赖，非 node 的生态无法跟着项目走，这对一个 web 项目来说不是很友好。</p>
+<p><code>font-spider</code> 它是基于 <code>fontmin</code> 做的一个自动化方案，需要一个静态的html文件，对我们的场景来说不是很友好</p>
+<p><code>fontmin</code> 是一个国内工程师做的，有 4k+ 的 star，应该非常优秀。但就是这个名字似乎对搜索引擎不太友好，或者官网的SEO没有做好导致我一开始并没有搜索到，直到后面做完了这个事情又翻了一下 font-spider 的依赖才发现的。</p>
+<h2 id="文本的提取"><a class="anchorjs-link" href="#文本的提取"></a>文本的提取</h2>
+<p>有了工具后问题其实只解决了一半，如何确定哪些字体用到了哪些文本上？</p>
+<ol>
+<li>人工筛选</li>
+<li>文本常量提取，饿汉模式，去重后一次性扔给工具，或者提取后打标记筛选后扔给工具</li>
+<li>自动化按需提取，只提取对应用到相应字体的文本</li>
+</ol>
+<h3 id="人工筛选"><a class="anchorjs-link" href="#人工筛选"></a>人工筛选</h3>
+<p>我相信没有这样呆的人，除非你只有一个页面，几个文字。并且这个方案在文本改变后这样的工作要再来一次。</p>
+<h3 id="文本提取常量"><a class="anchorjs-link" href="#文本提取常量"></a>文本提取常量</h3>
+<p>这个方式是比较常规的做法，但是如果有较多的页面那么工作量是极其巨大的，并且打标记这个非一次性的动作在文字改变后也是需要在检查一次的，如果是这样我宁愿不做这条优化。不过我还是尝试了一下，由于我们官网是多语言的，文本都在 json 文件里，写了 nodejs 的脚本跑了一圈，最大的 1.7MB 的字体文件在子集化后变成了<code>600KB</code> 左右，思考再三还是弃用了这个方案，因为在我看来效果虽然有，但是并不明显，不是一个 <code>awesome</code> 的结果。</p>
+<h3 id="自动化按需提取"><a class="anchorjs-link" href="#自动化按需提取"></a>自动化按需提取</h3>
+<p>这个方案是怎么来的呢，看了一圈 font-spider 源码后，猛然想起之前做 html 编程环境时拷贝 style 到 iframe 时用到的一个 api——<code>document.styleSheets</code>，它返回了当前页面的所有样式表，包括style 标签，link 标签（仅 rel=“stylesheet”）。</p>
+<p><strong>有了它我们可以拿到页面所有 css 选择器，及其选择器内的 css 键值对，那么我们可以遍历这些选择器和它的值，过滤 font-family 有值并且值匹配了我们需要优化的字体名，然后我们就可以用这个选择器去页面上查找元素，提取到我们要的内容。</strong></p>
+<p>到这里我们还是会觉得很麻烦，难道要每个页面执行一下这个脚本再把执行结果复制出来放到一起再去个重？是的，但是不是我们去做，我们交给机器去做。</p>
+<h2 id="一切交给机器"><a class="anchorjs-link" href="#一切交给机器"></a>一切交给机器</h2>
+<p><a target="_blank" rel="noopener" href="https://github.com/puppeteer/puppeteer">puppeteer</a> 是一套基于 nodejs 发开的用于操控浏览器的 api，它几乎可以模拟所有人的动作去操控 chrome、fire fox 等浏览器。nextjs 的构建产物里有一个 <code>.next/build-manifest.json</code> 这样的json文件，里面包含了页面的所有路由，于是我们就可以拿到这个路由列表使用 puppeteer 来运行上面的脚本，这样就可以把所有页面使用了自定义字体的文本都提取出来了。</p>
+<p>等等，还没完。对于需要交互后才挂载的部分，需要继续处理了。比如每个页面再维护一个 <code>clickSelectors</code> 数组，这个数组里面存放了需要点击的元素的选择器，页面加载后依次点击元素，等待预期的内容出现。</p>
+<h2 id="结果"><a class="anchorjs-link" href="#结果"></a>结果</h2>
+<p>字体文件优化后是 <code>95KB</code>，裁减掉的部分占比达到了惊人的 94%。它的效果是显而易见的，重新跑分移动端来到了40分左右。</p>
+<h2 id="其他优化"><a class="anchorjs-link" href="#其他优化"></a>其他优化</h2>
+<p>第三方的 sdk 也是拖慢我们的原因之一，ga 的 sdk一共有100多KB，我们在页面 <code>onload</code> 之后延迟若干秒之后再去初始化 ga，这样跑分又能多几分。其他的一些无需首屏加载的模块都可以采用这种方式做优化，全部做了之后首屏的资源体积肉眼可见的减小，自然 <code>light-house</code> 的跑分顺其自然就上去了。</p>
+<p>其他一些感知不强的优化就不讲了，可能做了也会淹没在每次测试的网络波动里。</p>
+<p>由于用react 的服务端渲染，客户端有一个 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/323174003"><strong>注水</strong></a> 的过程，以及其他组件初始化执行的过程，所以在 light-house 的测试里也会占用主线程较多的时间导致扣分。这部分是规避不掉的，除非我们回到 <code>jQuery</code> 的时代。</p>
+<h2 id="总结"><a class="anchorjs-link" href="#总结"></a>总结</h2>
+<p>web 页面加载的性能优化方向其实非常多，但是很多手段已经内置在基础设施里了。<br>
+比如上面提到的 nextjs，它的 Image 组件对图片的优化开箱即用，它的 <code>SSR</code> 是 react 生态的天花板，还有它路由级的 js 拆包方案等等。<br>
+比如已经是压缩后的 <code>woff</code> 字体格式，即使你开启 <code>gzip</code> 等也是没有效果的。<br>
+再比如新的 http2 协议，比如 cdn 等等。我们能做的就是从我们做了的事情里下手（搁这儿搁这儿。。。），比如忘记压缩的图片，一个未裁剪的自定义字体，一个太重的工具包，一个体积不太友好的 SDK 等等。</p>
+
+
+                <hr>
+                <!-- Pager -->
+                <ul class="pager clearfix">
+                    
+                    
+                    <li class="next">
+                        <a href="/2021/12/01/micro-front-scratch-extensions/" data-toggle="tooltip" data-placement="top"
+                            title="scratch 应用体积优化之——微前端化 scratch extensions">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+
+                <!-- UY BEGIN -->
+                <br>
+                <div id="uyan_frame"></div>
+                <!--<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2138668"></script>-->
+                <!-- UY END -->
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+
+<aside id="sidebar">
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">Contents</strong>
+    
+    <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%BC%80%E5%A7%8B%E6%9F%A5%E6%89%BE%E5%A4%A7%E6%96%87%E4%BB%B6"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">开始查找大文件</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%AF%BB%E6%89%BE%E5%B7%A5%E5%85%B7"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">寻找工具</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%96%87%E6%9C%AC%E7%9A%84%E6%8F%90%E5%8F%96"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">文本的提取</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E4%BA%BA%E5%B7%A5%E7%AD%9B%E9%80%89"><span class="toc-nav-number">3.1.</span> <span class="toc-nav-text">人工筛选</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%96%87%E6%9C%AC%E6%8F%90%E5%8F%96%E5%B8%B8%E9%87%8F"><span class="toc-nav-number">3.2.</span> <span class="toc-nav-text">文本提取常量</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E8%87%AA%E5%8A%A8%E5%8C%96%E6%8C%89%E9%9C%80%E6%8F%90%E5%8F%96"><span class="toc-nav-number">3.3.</span> <span class="toc-nav-text">自动化按需提取</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E4%B8%80%E5%88%87%E4%BA%A4%E7%BB%99%E6%9C%BA%E5%99%A8"><span class="toc-nav-number">4.</span> <span class="toc-nav-text">一切交给机器</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%BB%93%E6%9E%9C"><span class="toc-nav-number">5.</span> <span class="toc-nav-text">结果</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%85%B6%E4%BB%96%E4%BC%98%E5%8C%96"><span class="toc-nav-number">6.</span> <span class="toc-nav-text">其他优化</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-nav-number">7.</span> <span class="toc-nav-text">总结</span></a></li></ol>
+    
+  </div>
+</aside>
+
+
+
+
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async (u, c) {
+        var d = document,
+            t = 'script',
+            o = d.createElement(t),
+            s = d.getElementsByTagName(t)[0];
+        o.src = u;
+        if (c) {
+            o.addEventListener('load', function (e) {
+                c(null, e);
+            }, false);
+        }
+        s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+    <!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center">
+          
+          
+          
+
+          
+          <li>
+            <a target="_blank" href="http://weibo.com/2539035205">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a target="_blank" href="https://github.com/Ryuurock">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a href="mailto:lwx_1993@outlook.com">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+        </ul>
+        <p class="copyright text-muted">
+          Wanxiang Long(Ryuurock) &copy; 1993-2022
+          <br>
+          <span id="busuanzi_container_site_uv">小站访客数<span id="busuanzi_value_site_uv"></span>人次</span>
+          |
+          <span id="busuanzi_container_site_pv">小站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/lx-blog.js"></script>
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- async load function -->
+<script>
+  function async (u, c) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) {
+      o.addEventListener('load', function (e) {
+        c(null, e);
+      }, false);
+    }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+  // only load tagcloud.js in tag.html
+  if ($('#tag_cloud').length !== 0) {
+    async ("/js/jquery.tagcloud.js", function () {
+      $.fn.tagcloud.defaults = {
+        //size: {start: 1, end: 1, unit: 'em'},
+        color: {
+          start: '#bbbbee',
+          end: '#0085a1'
+        },
+      };
+      $('#tag_cloud a').tagcloud();
+    })
+  }
+</script>
+
+<!--fastClick.js -->
+<script>
+  async ("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    var $nav = document.querySelector("nav");
+    if ($nav) FastClick.attach($nav);
+  })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+    <a id="rocket" href="#top" class="iconfont icon-23435"></a>
+    <script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+    <!-- Image to hack wechat -->
+    <!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+    <!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

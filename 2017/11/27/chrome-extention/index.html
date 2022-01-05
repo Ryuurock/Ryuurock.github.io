@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="baidu-site-verification" content="code-Hn2FTkozwu" />
+  <meta name="google-site-verification" content="VRegEMvasrnJoWUYvftfL9jaiIF1ovA-dZPb4juzyCA" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="keyword" content="Web前端|前端|javascript|css|html|html5">
+  <link rel="icon" href="/favicon.ico">
+  <!-- Place this tag in your head or just before your close body tag. -->
+  <title>
+    
+    记一次chrome扩展开发 - longwanxiang的博客 | Ryuurock | Web前端实习生
+    
+  </title>
+  <link rel="canonical" href="https://ryuurock.github.io/2017/11/27/chrome-extention/">
+  <!-- Custom Fonts -->
+  <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+  <!-- Hux change font-awesome CDN to qiniu -->
+  <link href="//cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <!-- Bootstrap Core CSS -->
+  
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+  <!-- Custom CSS -->
+  
+<link rel="stylesheet" href="/css/beantech.min.css">
+
+  <!-- Pygments Highlight CSS -->
+  
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+<link rel="stylesheet" href="/css/widget.css">
+
+  
+<link rel="stylesheet" href="/css/rocket.css">
+
+  
+<link rel="stylesheet" href="/css/signature.css">
+
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  <link rel="stylesheet" type="text/css" href="//at.alicdn.com/t/font_qt49r5gb9r8b0529.css">
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+
+<body ontouchstart="">
+    <!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+  header.intro-header{
+    
+      background-image: url('/covers/post/IMG_3167.JPG')
+      /*post*/
+    
+  }
+  
+</style>
+
+<header class="intro-header" >
+  <!-- Signature -->
+  <div id="signature">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        
+          <div class="post-heading">
+            <div class="tags">
+                
+                  <a class="tag" href="/tags/#chrome extension" title="chrome extension">chrome extension</a>
+                
+            </div>
+            <h1>记一次chrome扩展开发</h1>
+            <h2 class="subheading"></h2>
+            <span class="meta">
+                Posted by Wanxiang Long(Ryuurock) on
+                2017-11-27
+            </span>
+          </div>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</header>
+
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header page-scroll">
+      <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Longwx Blog</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+    <div id="huxblog_navbar">
+      <div class="navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="/">Home</a></li>
+          <li><a href="/about/">About</a></li><li><a href="/archive/">Archives</a></li><li><a href="/tags/">Tags</a></li></ul>
+      </div>
+    </div>
+    <!-- /.navbar-collapse -->
+  </div>
+  <!-- /.container -->
+</nav>
+<script>
+  // Drop Bootstarp low-performance Navbar
+  // Use customize navbar with high-quality material design animation
+  // in high-perf jank-free CSS3 implementation
+  var $body = document.body;
+  var $toggle = document.querySelector('.navbar-toggle');
+  var $navbar = document.querySelector('#huxblog_navbar');
+  var $collapse = document.querySelector('.navbar-collapse');
+
+  $toggle.addEventListener('click', handleMagic)
+
+  function handleMagic(e) {
+    if ($navbar.className.indexOf('in') > 0) {
+      // CLOSE
+      $navbar.className = " ";
+      // wait until animation end.
+      setTimeout(function () {
+        // prevent frequently toggle
+        if ($navbar.className.indexOf('in') < 0) {
+          $collapse.style.height = "0px"
+        }
+      }, 400)
+    } else {
+      // OPEN
+      $collapse.style.height = "auto"
+      $navbar.className += " in";
+    }
+  }
+</script>
+
+
+    <!-- Modify by Yu-Hsuan Yen -->
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>讲真，在这之前我甚至不知道chrome的插件是由<code>javascript</code>驱动的，最近因为为了优化产品的体验，开始从chrome插件来下手，因为chrome插件能强势侵入别家的网页，篡改任何你想篡改的东西，甚至可以将<code>http</code>的请求和响应数据进行修改。官方文档需要梯子， <a target="_blank" rel="noopener" href="http://open.chrome.360.cn/">360翻译的文档</a>（不是一般的老，看网页布局就知道了）, <a target="_blank" rel="noopener" href="https://chajian.baidu.com/developer/extensions/getstarted.html">百度翻译的文档</a>.废话不多说，先来看看入口吧<br>
+chrome插件最重要的是一个叫<code>manifest.json</code>的文件，文件描述了整个扩展的行为：</p>
+<ul>
+<li>整个扩展需要的权限（网络请求，标签页读取等）</li>
+<li>扩展的icon</li>
+<li>扩展的contentScript、background、popup资源路径</li>
+<li>…<br>
+<code>contentScript</code>是注入到页面的js代码，但是它执行于一个隔离的环境，变量函数等与现有网页不会互相污染。<br>
+<code>background</code>是一个背景</li>
+</ul>
+<blockquote>
+<p>背景页是一个运行在扩展进程中的HTML页面。它在你的扩展的整个生命周期都存在，同时，在同一时间只有一个实例处于活动状态。</p>
+</blockquote>
+<p>上面这句话是官方文档翻译后的描述，很符合“背景”这个名字，在后台，安安静静，相对一个整个浏览器的这个扩展，只有一个实例。<br>
+<code>popup</code>这个页面就是我们在点击扩展按钮时弹出的一个html页面，它可以与其他两个进行通信。</p>
+<p>其实我们要做的是，将微信等平台通过<code>iframe</code>的形式嵌入到我们页面，且不让用户看到，通过代码来操作iframe内的内容，使用户在使用我们产品的同时，能够保留保留微信后台的体验。</p>
+<p>经过我的整理，整个扩展与我们页面的交互流程大致应该是这样的</p>
+<ol>
+<li>当页面发起一个请求，判断插件是否安装成功</li>
+<li>若安装有扩展则再通知扩展需要的操作</li>
+<li>扩展插入iframe后注入contentScript</li>
+<li>contentScript执行再通知扩展，扩展再通知我们的页面获取结果</li>
+</ol>
+<p>当然这只是一个大致流程，扩展的<code>contentScript</code>与页面唯一的通信方法则是触发某个dom的原生事件或自定义事件，再传入所需的数据。<strong>发布/订阅模式</strong>看来真的是万能啊。</p>
+<p>当然，为了其他人开发的方便性和可维护性，我建立了一个单独的模块<code>chromeExtensionHandler</code>，由这个模块统一管理与扩展的交互（这也是发布/订阅模式的弊端，过多的订阅发布，容易造成困扰，降低代码可读性）</p>
+<p>监听来自扩展的事件，只需要一处就够了，扩展通过带过来的数据来告知模块需要发布或处理怎样的数据，所以定义的页面端的模块传入数据是这样的</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;event&quot;</span>: <span class="string">&quot;&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;platform&quot;</span>: <span class="string">&quot;&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;data&quot;</span>: &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>所以我在事件监听处是这么写的</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">document</span>.body.addEventListener( <span class="string">&#x27;extensionBrowserEvent&#x27;</span>, <span class="function"><span class="keyword">function</span>(<span class="params"> &#123; detail &#125; </span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> jsonDetail = <span class="literal">null</span>;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    jsonDetail = <span class="keyword">typeof</span> detail === <span class="string">&#x27;object&#x27;</span> ? ( detail || &#123;&#125; ) : <span class="built_in">JSON</span>.parse( detail );</span><br><span class="line">  &#125; <span class="keyword">catch</span> ( error ) &#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">let</span> &#123; event, data, platform &#125; = jsonDetail;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> eventHandlers = platformHandler[ platform ];</span><br><span class="line">  <span class="keyword">let</span> namespaceEvent = <span class="string">`<span class="subst">$&#123;platform&#125;</span>.<span class="subst">$&#123;event&#125;</span>`</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> ( eventHandlers ) &#123;</span><br><span class="line">    <span class="comment">// 根据平台来获取相关的事件处理</span></span><br><span class="line">    <span class="keyword">let</span> handlerItem = eventHandlers[ namespaceEvent ];</span><br><span class="line">    handlerItem ? handlerItem( data ) : events.emit( namespaceEvent, data );</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    events.emit( namespaceEvent, data );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;, <span class="literal">false</span> );</span><br></pre></td></tr></table></figure>
+<p><code>event</code>就是用来描述此次扩展消息的名称的，因为可能会存在多个平台操作的问题，所以<code>platform</code>用来标记平台名称，比如<code>wechat</code>，data当然是此次消息需要的数据。<code>namespaceEvent</code>是用来描述命名空间了，为了对不同平台相同的事件进行区分。<br>
+这些事件中，有些需要模块来处理，有些需要模块调用者来处理，所以在上面的<code>if</code>逻辑里，就是用扩展通知的数据去匹配定义在对象里的函数进行处理，处理后再由函数决定是否发布此事件，若没有匹配到，则直接在此发布事件，说明此事件应由模块调用者自己处理。举个例子，扩展发出的数据是这样的</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;event&quot;</span>: <span class="string">&quot;scanCode&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;platform&quot;</span>: <span class="string">&quot;wechat&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;data&quot;</span>: <span class="literal">null</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>于是我们在平台为<code>wechat</code>的模块里定义了它的处理函数</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="string">&#x27;wechat.scanCode&#x27;</span>( data ) &#123;</span><br><span class="line">    <span class="comment">// do something</span></span><br><span class="line"></span><br><span class="line">    events.emit( <span class="string">&#x27;wechat.scanCode&#x27;</span>, data );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过上面的事件函数就能匹配到这里的函数再执行，那么如果有一个行文是一连串的话要怎么解决呢，比如发送一篇文章的流程是，<strong>登录》扫码》进入主页》跳转到编辑器页面》插入发送内容》…</strong>。难道调用者都要如此去每个事件监听再处理吗。为此，我们需要提供一个行为，叫“发送文章”，像大多数轮子一样，我们只需要提供一个函数就够了，如果是异步的，则返回一个<code>Promise</code>实例。于是wechat平台下还应该有这么一个对象</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">  <span class="attr">sendArticle</span>: ( <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 用户信息缓存</span></span><br><span class="line">    <span class="keyword">let</span> userInfoTemp = <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params"> articles, appID </span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>( <span class="function">(<span class="params"> resolve, reject </span>) =&gt;</span> &#123;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 发起一个封装好的通知插件初始化iframe的请求</span></span><br><span class="line">        initWechatFrame();</span><br><span class="line">        <span class="comment">// 进入微信公众平台首页</span></span><br><span class="line">        event.one( wechatConst._enteredIndex, <span class="keyword">async</span> <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">          <span class="comment">// 发起获取公众号账户和密码的请求</span></span><br><span class="line">          <span class="keyword">let</span> &#123; username, password &#125; = userInfoTemp ? <span class="built_in">Promise</span>.resolve( userInfoTemp ) : <span class="keyword">await</span> $.ajax</span><br><span class="line"></span><br><span class="line">          sendMessageToPulgin( &#123;</span><br><span class="line">            <span class="attr">platform</span>: <span class="string">&#x27;wechat&#x27;</span>,</span><br><span class="line">            <span class="comment">// 这里后面会讲为什么event也有命名空间</span></span><br><span class="line">            <span class="attr">event</span>: <span class="string">&#x27;page.login&#x27;</span>,</span><br><span class="line">            <span class="attr">data</span>: &#123;</span><br><span class="line">              username,</span><br><span class="line">              password</span><br><span class="line">            &#125;</span><br><span class="line">          &#125; );</span><br><span class="line"></span><br><span class="line">        &#125; );</span><br><span class="line">        </span><br><span class="line">        event.one( wechatConst._enteredHome, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">          <span class="comment">// 登录成功进入首页</span></span><br><span class="line">          sendMessageToPulgin( &#123;</span><br><span class="line">            <span class="attr">platform</span>: <span class="string">&#x27;wechat&#x27;</span>,</span><br><span class="line">            <span class="attr">event</span>: <span class="string">&#x27;page.goEditor&#x27;</span></span><br><span class="line">          &#125; );</span><br><span class="line">        &#125; );</span><br><span class="line"></span><br><span class="line">        event.one( wechatConst._enteredEditor, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">          <span class="comment">// 登录成功进入编辑器</span></span><br><span class="line">          </span><br><span class="line">          <span class="comment">// some code</span></span><br><span class="line">        &#125; );</span><br><span class="line"></span><br><span class="line">          <span class="comment">// 发送成功</span></span><br><span class="line">        event.one( wechatConst.sendSuccess, resolve );</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      &#125; ).catch( <span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>( err );</span><br><span class="line">      &#125; );</span><br><span class="line"></span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;() )</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>这里使用闭包函数是为了缓存用户信息，方便在多次操作时提高效率<br>
+为什么没有使用链式调用进行订阅，因为在这里还少一点代码没有码上，<code>one</code>方法返回一个当前订阅事件的id，为了在某个时刻对它们的订阅统一解除。虽然这里只订阅一次，但是还是有在某些情况出现重复订阅的情况，比如操作中途取消掉再操作。<br>
+至此，类似的一个行为的订阅集合，我们就能统一放到一个方法里面再导出，为模块调用者提供一套独立的业务能力，发送、预览等。</p>
+<p>模块端就马马虎虎介绍到这里，很多细节应该是遗漏了，想到要如果要逐行的描述出来，怕是您也没什么兴趣读下去了。</p>
+<p>接下来是扩展端，扩展端其实我已经想到了很远，甚至想到了兼容无数平台的场景，但是。。。。</p>
+<p>扩展端我们还是尊崇一进一出原则，一个出口，一个入口。扩展端接收的消息类型更复杂，从通知扩展插入iframe，再到注入脚本到iframe内，iframe的事件通知给我们的页面都是个繁杂的过程。因为iframe的事件首先要通知给插入到iframe的脚本，脚本再通知给最外层的，也就是注入到我们页面的<code>contentscript</code>，再由它来通知给页面dom触发事件。</p>
+<h5 id="还是先从入口说起吧。"><a class="anchorjs-link" href="#还是先从入口说起吧。"></a>还是先从入口说起吧。</h5>
+<p>思路是从一个<code>contentScript.js</code>文件作为入口，发送的消息还是按照平台来区分，但是<code>event</code>会多一个命名空间，用来区分事件是给通知<code>contentScript</code>的还是通知插入到iframe的<code>contentScript</code>的，这里我们为了区分每个平台就分别对应一个contentScript，查了文档，在使用下面这段代码</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">chrome.tabs.executeScript( tabId, &#123;</span><br><span class="line">  <span class="attr">file</span>: fileName,</span><br><span class="line">  <span class="attr">allFrames</span>: <span class="literal">true</span></span><br><span class="line">&#125; );</span><br></pre></td></tr></table></figure>
+<p>不能单独指定到哪个iframe，所以在代码执行前需要判断当前的<code>hostname</code>。</p>
+<p>我们如何知道页面进入了哪个地址下，然后需要做什么事呢，每个页面肯定有一个单独的url，在我们插入iframe时再绑定一个<code>onload</code>事件，每次在回调里注入我们的代码，代码立即会执行，再用<code>location.pathname</code>取得当前页面的pathname，以此名称作为函数名称来执行要做的事情（当然肯定要组织一个对象来存放映射的函数），比如通知我们的页面进入首页了，接下来需要输入密码登录。当然，可能并不是所有的网站每个页面都有个独立的pathname，比如微信后台某些页面带了查询参数来区分页面，那我们将参数取出再匹配一次，之前的pathname就不声明为函数，而声明为对象，将查询参数再匹配一次获得最终的结果。</p>
+<p>当然为了掌握别人的页面，我们肯定也要掌握每一个网络请求，chrome扩展本身提供了对网络请求的拦截，但不幸的是没有把响应消息体给我们，所以只能采取极端手段了，将代码真正的注入到dom里来改变原生<code>XmlHttpRequest</code>对象的行为，当然，这个权限也是要在<code>manifest.json</code>里面事先声明的。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">XMLHttpRequest.prototype.open = ( <span class="function"><span class="keyword">function</span>(<span class="params"> original_function </span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params"> method, url, <span class="keyword">async</span> </span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 保存请求相关参数</span></span><br><span class="line">    <span class="built_in">this</span>.requestMethod = method;</span><br><span class="line">    <span class="built_in">this</span>.requestURL = url;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">this</span>.addEventListener( <span class="string">&quot;readystatechange&quot;</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">if</span> ( <span class="built_in">this</span>.readyState === <span class="number">4</span> ) &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// do something</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    &#125; );</span><br><span class="line">    <span class="keyword">return</span> original_function.apply( <span class="built_in">this</span>, <span class="built_in">arguments</span> );</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;( XMLHttpRequest.prototype.open ) );</span><br><span class="line"></span><br><span class="line">XMLHttpRequest.prototype.send = ( <span class="function"><span class="keyword">function</span>(<span class="params"> original_function </span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params"> data </span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 保存请求相关参数</span></span><br><span class="line">    <span class="built_in">this</span>.requestData = data;</span><br><span class="line">    <span class="keyword">return</span> original_function.apply( <span class="built_in">this</span>, <span class="built_in">arguments</span> );</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;( XMLHttpRequest.prototype.send ) );</span><br></pre></td></tr></table></figure>
+<p>这样我们就能掌握所有的ajax请求了（当然<code>fetch</code>函数除外），对一些关注的网络请求，就能进行处理，并通知给扩展，扩展再通知给页面。最后便形成了目标页面到扩展，扩展再到页面的流程了。值得注意的是：</p>
+<ul>
+<li>iframe内发起的事件带出的数据，扩展内无法接收到也不知道是什么原因，所以最后我就放置了一个<code>textarea</code>标签来作为容器，通知扩展去取。</li>
+<li>自定义事件带入的数据需要{ detail: data } 这样的结构，因为在接收方需要以<code>event.detail</code>的方式去取。</li>
+</ul>
+<p>说了这么久感觉讲得不是很好，所以决定直接把代码放到github吧。<a target="_blank" rel="noopener" href="https://github.com/Ryuurock/blog-code/tree/master/chrome-extention-demo">仓库地址</a></p>
+
+
+                <hr>
+                <!-- Pager -->
+                <ul class="pager clearfix">
+                    
+                    <li class="previous">
+                        <a href="/2017/12/10/node-websocket-server/" data-toggle="tooltip" data-placement="top"
+                            title="搭建属于自己的web推送服务">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2017/11/24/recursion-function/" data-toggle="tooltip" data-placement="top"
+                            title="使用递归算法对树形菜单进行搜索">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+
+                <!-- UY BEGIN -->
+                <br>
+                <div id="uyan_frame"></div>
+                <!--<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2138668"></script>-->
+                <!-- UY END -->
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+
+<aside id="sidebar">
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">Contents</strong>
+    
+    <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-5"><a class="toc-nav-link" href="#%E8%BF%98%E6%98%AF%E5%85%88%E4%BB%8E%E5%85%A5%E5%8F%A3%E8%AF%B4%E8%B5%B7%E5%90%A7%E3%80%82"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">还是先从入口说起吧。</span></a></li></ol>
+    
+  </div>
+</aside>
+
+
+
+
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#chrome extension"
+                            title="chrome extension">chrome extension</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async (u, c) {
+        var d = document,
+            t = 'script',
+            o = d.createElement(t),
+            s = d.getElementsByTagName(t)[0];
+        o.src = u;
+        if (c) {
+            o.addEventListener('load', function (e) {
+                c(null, e);
+            }, false);
+        }
+        s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+    <!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center">
+          
+          
+          
+
+          
+          <li>
+            <a target="_blank" href="http://weibo.com/2539035205">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a target="_blank" href="https://github.com/Ryuurock">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a href="mailto:lwx_1993@outlook.com">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+        </ul>
+        <p class="copyright text-muted">
+          Wanxiang Long(Ryuurock) &copy; 1993-2022
+          <br>
+          <span id="busuanzi_container_site_uv">小站访客数<span id="busuanzi_value_site_uv"></span>人次</span>
+          |
+          <span id="busuanzi_container_site_pv">小站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/lx-blog.js"></script>
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- async load function -->
+<script>
+  function async (u, c) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) {
+      o.addEventListener('load', function (e) {
+        c(null, e);
+      }, false);
+    }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+  // only load tagcloud.js in tag.html
+  if ($('#tag_cloud').length !== 0) {
+    async ("/js/jquery.tagcloud.js", function () {
+      $.fn.tagcloud.defaults = {
+        //size: {start: 1, end: 1, unit: 'em'},
+        color: {
+          start: '#bbbbee',
+          end: '#0085a1'
+        },
+      };
+      $('#tag_cloud a').tagcloud();
+    })
+  }
+</script>
+
+<!--fastClick.js -->
+<script>
+  async ("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    var $nav = document.querySelector("nav");
+    if ($nav) FastClick.attach($nav);
+  })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+    <a id="rocket" href="#top" class="iconfont icon-23435"></a>
+    <script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+    <!-- Image to hack wechat -->
+    <!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+    <!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

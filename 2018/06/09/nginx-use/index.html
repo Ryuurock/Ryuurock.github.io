@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="baidu-site-verification" content="code-Hn2FTkozwu" />
+  <meta name="google-site-verification" content="VRegEMvasrnJoWUYvftfL9jaiIF1ovA-dZPb4juzyCA" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="keyword" content="Web前端|前端|javascript|css|html|html5">
+  <link rel="icon" href="/favicon.ico">
+  <!-- Place this tag in your head or just before your close body tag. -->
+  <title>
+    
+    记一次博客从http到https的迁移（nginx的使用） - longwanxiang的博客 | Ryuurock | Web前端实习生
+    
+  </title>
+  <link rel="canonical" href="https://ryuurock.github.io/2018/06/09/nginx-use/">
+  <!-- Custom Fonts -->
+  <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+  <!-- Hux change font-awesome CDN to qiniu -->
+  <link href="//cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <!-- Bootstrap Core CSS -->
+  
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+  <!-- Custom CSS -->
+  
+<link rel="stylesheet" href="/css/beantech.min.css">
+
+  <!-- Pygments Highlight CSS -->
+  
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+<link rel="stylesheet" href="/css/widget.css">
+
+  
+<link rel="stylesheet" href="/css/rocket.css">
+
+  
+<link rel="stylesheet" href="/css/signature.css">
+
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  <link rel="stylesheet" type="text/css" href="//at.alicdn.com/t/font_qt49r5gb9r8b0529.css">
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+
+<body ontouchstart="">
+    <!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+  header.intro-header{
+    
+      background-image: url('/covers/post/IMG_2544.JPG')
+      /*post*/
+    
+  }
+  
+</style>
+
+<header class="intro-header" >
+  <!-- Signature -->
+  <div id="signature">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        
+          <div class="post-heading">
+            <div class="tags">
+                
+                  <a class="tag" href="/tags/#nginx" title="nginx">nginx</a>
+                
+            </div>
+            <h1>记一次博客从http到https的迁移（nginx的使用）</h1>
+            <h2 class="subheading"></h2>
+            <span class="meta">
+                Posted by Wanxiang Long(Ryuurock) on
+                2018-06-09
+            </span>
+          </div>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</header>
+
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header page-scroll">
+      <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Longwx Blog</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+    <div id="huxblog_navbar">
+      <div class="navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="/">Home</a></li>
+          <li><a href="/about/">About</a></li><li><a href="/archive/">Archives</a></li><li><a href="/tags/">Tags</a></li></ul>
+      </div>
+    </div>
+    <!-- /.navbar-collapse -->
+  </div>
+  <!-- /.container -->
+</nav>
+<script>
+  // Drop Bootstarp low-performance Navbar
+  // Use customize navbar with high-quality material design animation
+  // in high-perf jank-free CSS3 implementation
+  var $body = document.body;
+  var $toggle = document.querySelector('.navbar-toggle');
+  var $navbar = document.querySelector('#huxblog_navbar');
+  var $collapse = document.querySelector('.navbar-collapse');
+
+  $toggle.addEventListener('click', handleMagic)
+
+  function handleMagic(e) {
+    if ($navbar.className.indexOf('in') > 0) {
+      // CLOSE
+      $navbar.className = " ";
+      // wait until animation end.
+      setTimeout(function () {
+        // prevent frequently toggle
+        if ($navbar.className.indexOf('in') < 0) {
+          $collapse.style.height = "0px"
+        }
+      }, 400)
+    } else {
+      // OPEN
+      $collapse.style.height = "auto"
+      $navbar.className += " in";
+    }
+  }
+</script>
+
+
+    <!-- Modify by Yu-Hsuan Yen -->
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>最近心血来潮，想把一件一直没干的事情干了——把博客迁移到国外的vps。至于为什么迁，一是国内的vps租不起，二是在国内假网站那漫长的备案时间就够感人了，三是放到github.io上面百度的spider爬不到，影响我优秀的博客的曝光率（#手动滑稽）。多方查证后，原来是因为百度的爬取频率太高，给服务器造成压力，所以github不喜欢这样的spider，所以直接403了。<br>
+反正最近什么都到期了，去年注册的<code>.me</code>域名到期了，vps块到期了，去年底抢的免费阿里云vps到期了。为了省去域名迁移的麻烦并且还要给迁移费，所以就直接重新换一个域名，换一个服务商，免得到时候连解析到国外的空间都要设置什么门槛。下面就来说说整个博客的切换步骤</p>
+<h4 id="域名注册"><a class="anchorjs-link" href="#域名注册"></a>域名注册</h4>
+<p>这个没啥好说的，给钱就行，而且我这个奇葩域名也没人和我抢注吧，也不像是有啥商业价值的样子，安安心心付款后等待了10分钟左右，域名就到手了。<br>
+之前我的vps是拿来架设科学上网工具的，每月的流量也用不完，反正闲着也是闲着，何不放点东西上去</p>
+<h4 id="在服务器安装nginx"><a class="anchorjs-link" href="#在服务器安装nginx"></a>在服务器安装nginx</h4>
+<p>当然第一步就是下载安装包<a target="_blank" rel="noopener" href="https://nginx.org/en/download.html">https://nginx.org/en/download.html</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ wget https://nginx.org/download/nginx-1.14.0.tar.gz</span><br></pre></td></tr></table></figure>
+<p>然后解压</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ tar -zxvf nginx-1.14.0.tar.gz</span><br></pre></td></tr></table></figure>
+<p>进入目录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> nginx-1.14.0</span><br></pre></td></tr></table></figure>
+<p>配置(我们这里是为了升级到https，当然要附带上ssl模块)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ./configure --with-http_ssl_module </span><br></pre></td></tr></table></figure>
+<p>编译安装</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ make</span><br><span class="line">$ make install</span><br></pre></td></tr></table></figure>
+<p>如果一切顺利，nginx就安装好了，当然，如果因为系统原因报一些缺胳膊少腿的错，就先补上相应的系统组件</p>
+<h4 id="配置nginx"><a class="anchorjs-link" href="#配置nginx"></a>配置nginx</h4>
+<p>先不忙启动nginx，我们还需要修改配置，打开<code>/usr/local/nginx/conf/nginx.conf</code>文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /usr/<span class="built_in">local</span>/nginx/conf/nginx.conf</span><br></pre></td></tr></table></figure>
+<p>我们要对443端口做监听和修改，示例配置在最后，我们取消注释后就行，其他配置项都不用改，只需要修改<code>server_name</code>、<code>ssl_certificate</code>、<code>ssl_certificate_key</code>这三项，后面两个就是我们的证书，一般我们都是找的免费证书，这里有一个免费证书申请网站<a target="_blank" rel="noopener" href="https://freessl.org/">https://freessl.org/</a>，注册登录后按照它的步骤来，就能直接申请到免费的证书</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">  listen       443 ssl;</span><br><span class="line">  <span class="comment"># 配置你的域名</span></span><br><span class="line">  server_name  ryuurock.com;</span><br><span class="line">  <span class="comment"># 这里就是我们证书的路径，下载后放到服务器上</span></span><br><span class="line">  ssl_certificate      /home/ssl/full_chain.pem;</span><br><span class="line">  ssl_certificate_key  /home/ssl/private.key;</span><br><span class="line"></span><br><span class="line">  ssl_session_cache    shared:SSL:1m;</span><br><span class="line">  ssl_session_timeout  5m;</span><br><span class="line"></span><br><span class="line">  ssl_ciphers  HIGH:!aNULL:!MD5;</span><br><span class="line">  ssl_prefer_server_ciphers  on;</span><br><span class="line"></span><br><span class="line">  location / &#123;</span><br><span class="line">    <span class="comment"># 这里放我们的静态资源路径，就是我们的博客</span></span><br><span class="line">    root   /home/wwwroot;</span><br><span class="line">    <span class="comment"># 这里是我们的入口文件</span></span><br><span class="line">    index  index.html index.htm;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这样配置后，再启动我们的nginx</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ /usr/<span class="built_in">local</span>/nginx/sbin/nginx</span><br></pre></td></tr></table></figure>
+<h4 id="打开端口白名单"><a class="anchorjs-link" href="#打开端口白名单"></a>打开端口白名单</h4>
+<p>然后浏览器输入网址<code>https://ryuurock.com</code>，发现并不能访问，因为我们少了一个步骤，<strong>打开端口</strong>，一般防火墙默认是没有打开443端口的</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ firewall-cmd --zone=public --add-port=443/tcp --permanent</span><br><span class="line">$ firewall-cmd --zone=public --add-port=80/tcp --permanent</span><br></pre></td></tr></table></figure>
+<p><code>--zone</code>是作用域，<code>--add-port</code>是打开的端口和访问类型，<code>--permanent</code>是永久生效，这里我们顺便把80端口也打开<br>
+还有重要的一步就是修改端口配置后需要重启防火墙，不然是无法生效的</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ firewall-cmd --reload</span><br></pre></td></tr></table></figure>
+<p>这里还有一些其他的命令一并记录下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 停止防火墙</span></span><br><span class="line">$ systemctl stop firewalld.service</span><br><span class="line"><span class="comment"># 禁止防火墙开机启动</span></span><br><span class="line">$ systemctl <span class="built_in">disable</span> firewalld.service</span><br><span class="line"><span class="comment"># 移除端口</span></span><br><span class="line">$ firewall-cmd --zone= public --remove-port=80/tcp --permanent</span><br></pre></td></tr></table></figure>
+<h4 id="全站https"><a class="anchorjs-link" href="#全站https"></a>全站https</h4>
+<p>然后我们发现可以打开网页了，但是为啥小绿锁没出现？因为网页里还有部分请求是http打头的，想要显示为安全和那把小绿锁，就需要全站https，但是我每篇文章的头图都是放在七牛的，七牛默认不支持https，需要自定义域名上传ssl证书才能https访问，并且需要一个已备案的域名，遂对七牛说再见。使用七牛的批量下载工具将所有头图下载到hexo目录里，再修改统一的路径配置，还有一些第三方的js资源 将<code>http://</code>改成<code>//</code>，这样就兼容了，不过前提是它也同时支持http和https。</p>
+<h4 id="强制跳转https"><a class="anchorjs-link" href="#强制跳转https"></a>强制跳转https</h4>
+<p>有时候我们想要http强制跳转到https（参考百度首页），就需要对nginx配置再作修改，主要是修改80端口的地方</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">  listen       80;</span><br><span class="line">  server_name  ryuurock.com;</span><br><span class="line">  <span class="built_in">return</span>       301 https://$server_name<span class="variable">$request_uri</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样我们就能强制http请求跳转到https了。</p>
+<h4 id="开启gzip提高第一次加载速度"><a class="anchorjs-link" href="#开启gzip提高第一次加载速度"></a>开启gzip提高第一次加载速度</h4>
+<p>本来资源就在国外，这导致到国内的响应速度很慢，为了相对的提高一点速度，还是有必要开启gzip加速的</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">http &#123;</span><br><span class="line">  gzip on;</span><br><span class="line">  gzip_min_length 1k;</span><br><span class="line">  gzip_comp_level 4;</span><br><span class="line">  gzip_types  text/plain application/javascript text/css application/xml text/javascript application/x-httpd-php image/jpeg image/gif;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面的配置就是对一些文件类型进行压缩，<code>gzip_comp_level</code>是压缩等级，数字越大压缩率越大，但是也会加重cpu的负担，介于我的小vps 4就够了。<br>
+至此，本次迁移和一些nginx的使用就到此结束了，当然nginx只是一些入门的使用，应付一些静态资源部署还是够了，包括一些url正则匹配，反向代理，多域名部署等，在今后遇到类似使用场景时再作记录。</p>
+
+
+                <hr>
+                <!-- Pager -->
+                <ul class="pager clearfix">
+                    
+                    <li class="previous">
+                        <a href="/2018/10/21/new-web-components/" data-toggle="tooltip" data-placement="top"
+                            title="不一样的Web Components——Shadow DOM">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2018/05/18/canvas-particale/" data-toggle="tooltip" data-placement="top"
+                            title="canvas粒子效果初探">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+
+                <!-- UY BEGIN -->
+                <br>
+                <div id="uyan_frame"></div>
+                <!--<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2138668"></script>-->
+                <!-- UY END -->
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+
+<aside id="sidebar">
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">Contents</strong>
+    
+    <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%9F%9F%E5%90%8D%E6%B3%A8%E5%86%8C"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">域名注册</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%9C%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%AE%89%E8%A3%85nginx"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">在服务器安装nginx</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E9%85%8D%E7%BD%AEnginx"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">配置nginx</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E6%89%93%E5%BC%80%E7%AB%AF%E5%8F%A3%E7%99%BD%E5%90%8D%E5%8D%95"><span class="toc-nav-number">4.</span> <span class="toc-nav-text">打开端口白名单</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%85%A8%E7%AB%99https"><span class="toc-nav-number">5.</span> <span class="toc-nav-text">全站https</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%BC%BA%E5%88%B6%E8%B7%B3%E8%BD%AChttps"><span class="toc-nav-number">6.</span> <span class="toc-nav-text">强制跳转https</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%BC%80%E5%90%AFgzip%E6%8F%90%E9%AB%98%E7%AC%AC%E4%B8%80%E6%AC%A1%E5%8A%A0%E8%BD%BD%E9%80%9F%E5%BA%A6"><span class="toc-nav-number">7.</span> <span class="toc-nav-text">开启gzip提高第一次加载速度</span></a></li></ol>
+    
+  </div>
+</aside>
+
+
+
+
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#nginx"
+                            title="nginx">nginx</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async (u, c) {
+        var d = document,
+            t = 'script',
+            o = d.createElement(t),
+            s = d.getElementsByTagName(t)[0];
+        o.src = u;
+        if (c) {
+            o.addEventListener('load', function (e) {
+                c(null, e);
+            }, false);
+        }
+        s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+    <!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center">
+          
+          
+          
+
+          
+          <li>
+            <a target="_blank" href="http://weibo.com/2539035205">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a target="_blank" href="https://github.com/Ryuurock">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a href="mailto:lwx_1993@outlook.com">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+        </ul>
+        <p class="copyright text-muted">
+          Wanxiang Long(Ryuurock) &copy; 1993-2022
+          <br>
+          <span id="busuanzi_container_site_uv">小站访客数<span id="busuanzi_value_site_uv"></span>人次</span>
+          |
+          <span id="busuanzi_container_site_pv">小站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/lx-blog.js"></script>
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- async load function -->
+<script>
+  function async (u, c) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) {
+      o.addEventListener('load', function (e) {
+        c(null, e);
+      }, false);
+    }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+  // only load tagcloud.js in tag.html
+  if ($('#tag_cloud').length !== 0) {
+    async ("/js/jquery.tagcloud.js", function () {
+      $.fn.tagcloud.defaults = {
+        //size: {start: 1, end: 1, unit: 'em'},
+        color: {
+          start: '#bbbbee',
+          end: '#0085a1'
+        },
+      };
+      $('#tag_cloud a').tagcloud();
+    })
+  }
+</script>
+
+<!--fastClick.js -->
+<script>
+  async ("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    var $nav = document.querySelector("nav");
+    if ($nav) FastClick.attach($nav);
+  })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+    <a id="rocket" href="#top" class="iconfont icon-23435"></a>
+    <script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+    <!-- Image to hack wechat -->
+    <!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+    <!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

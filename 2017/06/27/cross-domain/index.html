@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="baidu-site-verification" content="code-Hn2FTkozwu" />
+  <meta name="google-site-verification" content="VRegEMvasrnJoWUYvftfL9jaiIF1ovA-dZPb4juzyCA" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="keyword" content="Web前端|前端|javascript|css|html|html5">
+  <link rel="icon" href="/favicon.ico">
+  <!-- Place this tag in your head or just before your close body tag. -->
+  <title>
+    
+    关于javascript的跨域问题的几种解决办法 - longwanxiang的博客 | Ryuurock | Web前端实习生
+    
+  </title>
+  <link rel="canonical" href="https://ryuurock.github.io/2017/06/27/cross-domain/">
+  <!-- Custom Fonts -->
+  <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+  <!-- Hux change font-awesome CDN to qiniu -->
+  <link href="//cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <!-- Bootstrap Core CSS -->
+  
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+  <!-- Custom CSS -->
+  
+<link rel="stylesheet" href="/css/beantech.min.css">
+
+  <!-- Pygments Highlight CSS -->
+  
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+<link rel="stylesheet" href="/css/widget.css">
+
+  
+<link rel="stylesheet" href="/css/rocket.css">
+
+  
+<link rel="stylesheet" href="/css/signature.css">
+
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  <link rel="stylesheet" type="text/css" href="//at.alicdn.com/t/font_qt49r5gb9r8b0529.css">
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+
+<body ontouchstart="">
+    <!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+  header.intro-header{
+    
+      background-image: url('/covers/post/IMG_24851.JPG')
+      /*post*/
+    
+  }
+  
+</style>
+
+<header class="intro-header" >
+  <!-- Signature -->
+  <div id="signature">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        
+          <div class="post-heading">
+            <div class="tags">
+                
+                  <a class="tag" href="/tags/#javascript" title="javascript">javascript</a>
+                
+                  <a class="tag" href="/tags/#跨域" title="跨域">跨域</a>
+                
+            </div>
+            <h1>关于javascript的跨域问题的几种解决办法</h1>
+            <h2 class="subheading"></h2>
+            <span class="meta">
+                Posted by Wanxiang Long(Ryuurock) on
+                2017-06-27
+            </span>
+          </div>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</header>
+
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header page-scroll">
+      <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Longwx Blog</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+    <div id="huxblog_navbar">
+      <div class="navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="/">Home</a></li>
+          <li><a href="/about/">About</a></li><li><a href="/archive/">Archives</a></li><li><a href="/tags/">Tags</a></li></ul>
+      </div>
+    </div>
+    <!-- /.navbar-collapse -->
+  </div>
+  <!-- /.container -->
+</nav>
+<script>
+  // Drop Bootstarp low-performance Navbar
+  // Use customize navbar with high-quality material design animation
+  // in high-perf jank-free CSS3 implementation
+  var $body = document.body;
+  var $toggle = document.querySelector('.navbar-toggle');
+  var $navbar = document.querySelector('#huxblog_navbar');
+  var $collapse = document.querySelector('.navbar-collapse');
+
+  $toggle.addEventListener('click', handleMagic)
+
+  function handleMagic(e) {
+    if ($navbar.className.indexOf('in') > 0) {
+      // CLOSE
+      $navbar.className = " ";
+      // wait until animation end.
+      setTimeout(function () {
+        // prevent frequently toggle
+        if ($navbar.className.indexOf('in') < 0) {
+          $collapse.style.height = "0px"
+        }
+      }, 400)
+    } else {
+      // OPEN
+      $collapse.style.height = "auto"
+      $navbar.className += " in";
+    }
+  }
+</script>
+
+
+    <!-- Modify by Yu-Hsuan Yen -->
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>要说跨域，那得先来认识什么是跨域，以下内容摘自网络<br>
+<img src="20170627224652.jpg" alt="跨域"></p>
+<p>总而言之就是浏览器厂商为了web安全，使得不同域名的网页之间，无法通信，在博主的web开发历程中，主要遇到的是以下几种跨域的情况。</p>
+<ul>
+<li>web api访问时</li>
+<li>iframe与父页面或顶层页面之间资源访问时</li>
+<li>访问opener时</li>
+</ul>
+<p>一般解决跨域问题可以从两个维度来解决</p>
+<ul>
+<li>web前端通过一些技巧来解决</li>
+<li>后端的服务器解决</li>
+</ul>
+<h3 id="通过前端手段解决"><a class="anchorjs-link" href="#通过前端手段解决"></a>通过前端手段解决</h3>
+<p>通过前端来解决跨域问题是有限制的，但是能在不动后端代码的前提下已经能解决大部分的跨域问题了</p>
+<h4 id="解决web-api的访问限制"><a class="anchorjs-link" href="#解决web-api的访问限制"></a>解决web api的访问限制</h4>
+<p>这种情况不少，因为开发模式的问题（比如你接的前端私活，给你提供了接口挂在外网，但是没有给你后端的源码，你无法启动一个本地服务来开发），或者你使用的是别人的服务（如一些实时天气数据接口），都会遇到跨域问题。因为服务器一般情况下并不会相应一个非本域名下的请求，这也是出于安全的考虑。但是我们可以通过jsonp来解决这个问题。<br>
+我们都知道script标签可以引用来自任何域名下的js脚本文件（不存在的网站除外，你懂的），于是我们就可以通过这个特性来实现跨域访问一些api<br>
+比如有一个请求是这样的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://example.com/getData</span><br></pre></td></tr></table></figure>
+<p>而我们的线上环境是http://mydomain.com，如果我们直接用<code>XmlHttpRequest</code>构造方法去发起这个请求，浏览器必定会抛出跨域的错误从而无法达到我们的预期，但是如果我们以这样的方式去请求这个接口</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;http://example.com/getData&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>你会说，这样就行了？ 慢着，这只是第一步，jsonp是需要通过后端的配合才能完成的。后端在此时的输出应该是一个执行的函数，实参是你要拿到的数据比如php</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这里只是一个例子，可能浏览器端不会执</span></span><br><span class="line"><span class="comment">// 因为浏览器可能认为这只是一个字符串，具体的还请使用各个语言的特性使其输出为一个对象</span></span><br><span class="line"><span class="keyword">echo</span> <span class="string">&#x27;callback(&#123;&quot;data&quot;: &quot;hello world!&quot;&#125;)&#x27;</span>;</span><br></pre></td></tr></table></figure>
+<p>当这个“资源文件”请求完成后，js引擎便会执行这段脚本，从全局环境寻找<code>callback</code>这个函数，于是如果你事先定义了这个函数，如：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">window</span>.callback = <span class="function"><span class="keyword">function</span>(<span class="params"> data </span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log( data );</span><br><span class="line">  <span class="comment">// DO STH...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>控制台便会输出服务端返回的<code>data</code>，但是一般情况下不会这样去请求一个jsonp类型的接口，往往是动态生成一个script标签写入到页面响应后再移除，并且具体响应的函数通过参数的形式传到后台，比如</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;http://example.com/getData?callback=yourcallback&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><code>yourCallback</code>就是你定义的相应函数。通过jsonp的方式访问跨域的api有很多弊端，比如</p>
+<ul>
+<li>只能发起get请求，无法post数据</li>
+<li>执行上下文只能是global(如果你要通过callback参数传递一串context我也无异议)</li>
+</ul>
+<p>这是通过前端的办法（其实也有后端的配合）解决跨域api访问的限制。</p>
+<h4 id="解决iframe与父页面或顶层页面的通信-opener同理"><a class="anchorjs-link" href="#解决iframe与父页面或顶层页面的通信-opener同理"></a>解决iframe与父页面或顶层页面的通信(opener同理)</h4>
+<p>iframe与父页面之间的通信只能是根域名完全相同才行，比如：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://iframe.xn--coma-221g.iframe.com">iframe.com和a.iframe.com</a></li>
+<li><a target="_blank" rel="noopener" href="http://a.iframe.xn--comb-221g.iframe.com">a.iframe.com和b.iframe.com</a></li>
+<li><a target="_blank" rel="noopener" href="http://iframe.xn--comiframe-sw9o.com:8080">iframe.com和iframe.com:8080</a></li>
+</ul>
+<p>如果根域名不同是无法通过常规手段进行通信的比如：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://a.xn--comb-nb5f.com">a.com与b.com</a>（包括二级三级域名）</li>
+<li><a target="_blank" rel="noopener" href="http://1.1.1.xn--1a-2v2c.com">1.1.1.1与a.com</a></li>
+</ul>
+<p>要解决同根域名之间的跨域（如获取子/父页面的dom、属性、方法）其实很简单，只需要将它们的domain都设置成根域名就好了</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// a.iframe.com下面的脚本</span></span><br><span class="line"><span class="built_in">document</span>.domain = <span class="string">&#x27;iframe.com&#x27;</span>;</span><br><span class="line"><span class="comment">// b.iframe.com下面的脚本（iframe或opener）</span></span><br><span class="line"><span class="built_in">document</span>.domain = <span class="string">&#x27;iframe.com&#x27;</span>;</span><br></pre></td></tr></table></figure>
+<p>这样，同根域名页面之间的跨域问题便解决了，可以自由操纵dom，自由读写属性和方法</p>
+<h3 id="通过后端服务解决"><a class="anchorjs-link" href="#通过后端服务解决"></a>通过后端服务解决</h3>
+<p>也许你只是想解决webapi的跨域问题又拒绝使用jsonp这种感觉有点‘low’的解决方案，这时候就轮到服务端代码登场了，通过修改响应头信息来告知浏览器这个请求是否是安全可靠的。<br>
+我们知道http协议的请求头/应头都有一串键值对，<code>Origin</code>这个属性会在我们的请求头里，<code>Access-Control-Allow-Origin</code>这个属性可能会在我们的响应头里（因为在本域名请求下这个属性有没有都无所谓），这就是我们能成功实现跨域接口访问的关键。当服务器端在<code>access-Control-Allow-Origin</code>里包含了我们的<code>Origin</code>，那浏览器就发起真正的请求，接口就能正确相应，这里以java为例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这里是过滤器里面的方法</span></span><br><span class="line"><span class="meta">@Override</span>  </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doFilter</span><span class="params">(ServletRequest req, ServletResponse res,  </span></span></span><br><span class="line"><span class="params"><span class="function">  FilterChain chain)</span> <span class="keyword">throws</span> IOException, ServletException </span>&#123;  </span><br><span class="line">  HttpServletResponse response = (HttpServletResponse) res;  </span><br><span class="line">  <span class="comment">// 请求是什么Host，就响应什么</span></span><br><span class="line">  response.setHeader(<span class="string">&quot;Access-Control-Allow-Origin&quot;</span>, request.getHeader(<span class="string">&quot;Host&quot;</span>));  </span><br><span class="line">  response.setHeader(<span class="string">&quot;Access-Control-Allow-Methods&quot;</span>, <span class="string">&quot;POST, GET, OPTIONS, DELETE&quot;</span>);  </span><br><span class="line">  response.setHeader(<span class="string">&quot;Access-Control-Allow-Headers&quot;</span>, <span class="string">&quot;x-requested-with&quot;</span>);  </span><br><span class="line">  chain.doFilter(req, res);  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+<p>这里有两点要注意</p>
+<ul>
+<li>浏览器检测到这是个跨域的请求时，会先发起一个请求方法为&quot;options&quot;的请求，所以服务端还必须得允许OPTIONS的请求类型</li>
+<li>jquery的ajax的请求头会有x-requested-with这样的字样，<code>response.setHeader(&quot;Access-Control-Allow-Headers&quot;, &quot;x-requested-with&quot;)</code>这段代码依然是告诉浏览器允许这个自定义请求头<br>
+往往允许一个跨域请求还要满足以上两点才能成功，总结一下浏览器的跨域api请求流程：</li>
+</ul>
+<ol>
+<li>检测到这是一个跨域的请求（请求url的host和当前页面host不一样）;</li>
+<li>先发起一个method为OPTIONS的请求，如果服务器的响应信息<code>Access-Control-Allow-Origin</code>没有我们的host，或者不允许OPTIONS请求方法，或者不允许自定义请求头<code>x-requested-with</code>，请求停止，抛出错误。否则：</li>
+<li>再发一起一个正常的xhr请求，此时才会响应我们的逻辑回调函数</li>
+</ol>
+<p>在浏览器的开发者工具 network一栏里筛选xhr类型的请求可以清楚的看到浏览器对同一个请求发起了两次，第一次是OPTION请求，没有带上任何参数，第二次就是常规的请求</p>
+<p>以上则是博主对一些常见的跨域问题的解决方法的简单介绍，如有错误欢迎通过下方邮件指出。</p>
+
+
+                <hr>
+                <!-- Pager -->
+                <ul class="pager clearfix">
+                    
+                    <li class="previous">
+                        <a href="/2017/07/12/ajax-promise/" data-toggle="tooltip" data-placement="top"
+                            title="如何保证ajax按你想要的顺序执行？">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2017/06/21/jQuery-pulgin-retract/" data-toggle="tooltip" data-placement="top"
+                            title="基于jQuery的轻量图片排版插件">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+
+                <!-- UY BEGIN -->
+                <br>
+                <div id="uyan_frame"></div>
+                <!--<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2138668"></script>-->
+                <!-- UY END -->
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+
+<aside id="sidebar">
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">Contents</strong>
+    
+    <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E9%80%9A%E8%BF%87%E5%89%8D%E7%AB%AF%E6%89%8B%E6%AE%B5%E8%A7%A3%E5%86%B3"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">通过前端手段解决</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E8%A7%A3%E5%86%B3web-api%E7%9A%84%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6"><span class="toc-nav-number">1.1.</span> <span class="toc-nav-text">解决web api的访问限制</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E8%A7%A3%E5%86%B3iframe%E4%B8%8E%E7%88%B6%E9%A1%B5%E9%9D%A2%E6%88%96%E9%A1%B6%E5%B1%82%E9%A1%B5%E9%9D%A2%E7%9A%84%E9%80%9A%E4%BF%A1-opener%E5%90%8C%E7%90%86"><span class="toc-nav-number">1.2.</span> <span class="toc-nav-text">解决iframe与父页面或顶层页面的通信(opener同理)</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E9%80%9A%E8%BF%87%E5%90%8E%E7%AB%AF%E6%9C%8D%E5%8A%A1%E8%A7%A3%E5%86%B3"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">通过后端服务解决</span></a></li></ol>
+    
+  </div>
+</aside>
+
+
+
+
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#javascript"
+                            title="javascript">javascript</a>
+                        
+                        <a class="tag" href="/tags/#跨域"
+                            title="跨域">跨域</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async (u, c) {
+        var d = document,
+            t = 'script',
+            o = d.createElement(t),
+            s = d.getElementsByTagName(t)[0];
+        o.src = u;
+        if (c) {
+            o.addEventListener('load', function (e) {
+                c(null, e);
+            }, false);
+        }
+        s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+    <!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center">
+          
+          
+          
+
+          
+          <li>
+            <a target="_blank" href="http://weibo.com/2539035205">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a target="_blank" href="https://github.com/Ryuurock">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a href="mailto:lwx_1993@outlook.com">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+        </ul>
+        <p class="copyright text-muted">
+          Wanxiang Long(Ryuurock) &copy; 1993-2022
+          <br>
+          <span id="busuanzi_container_site_uv">小站访客数<span id="busuanzi_value_site_uv"></span>人次</span>
+          |
+          <span id="busuanzi_container_site_pv">小站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/lx-blog.js"></script>
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- async load function -->
+<script>
+  function async (u, c) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) {
+      o.addEventListener('load', function (e) {
+        c(null, e);
+      }, false);
+    }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+  // only load tagcloud.js in tag.html
+  if ($('#tag_cloud').length !== 0) {
+    async ("/js/jquery.tagcloud.js", function () {
+      $.fn.tagcloud.defaults = {
+        //size: {start: 1, end: 1, unit: 'em'},
+        color: {
+          start: '#bbbbee',
+          end: '#0085a1'
+        },
+      };
+      $('#tag_cloud a').tagcloud();
+    })
+  }
+</script>
+
+<!--fastClick.js -->
+<script>
+  async ("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    var $nav = document.querySelector("nav");
+    if ($nav) FastClick.attach($nav);
+  })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+    <a id="rocket" href="#top" class="iconfont icon-23435"></a>
+    <script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+    <!-- Image to hack wechat -->
+    <!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+    <!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

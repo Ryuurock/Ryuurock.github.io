@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="baidu-site-verification" content="code-Hn2FTkozwu" />
+  <meta name="google-site-verification" content="VRegEMvasrnJoWUYvftfL9jaiIF1ovA-dZPb4juzyCA" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="keyword" content="Web前端|前端|javascript|css|html|html5">
+  <link rel="icon" href="/favicon.ico">
+  <!-- Place this tag in your head or just before your close body tag. -->
+  <title>
+    
+    longwanxiang的博客 | Ryuurock | Web前端实习生
+    
+  </title>
+  <link rel="canonical" href="https://ryuurock.github.io/">
+  <!-- Custom Fonts -->
+  <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+  <!-- Hux change font-awesome CDN to qiniu -->
+  <link href="//cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <!-- Bootstrap Core CSS -->
+  
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+  <!-- Custom CSS -->
+  
+<link rel="stylesheet" href="/css/beantech.min.css">
+
+  <!-- Pygments Highlight CSS -->
+  
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+<link rel="stylesheet" href="/css/widget.css">
+
+  
+<link rel="stylesheet" href="/css/rocket.css">
+
+  
+<link rel="stylesheet" href="/css/signature.css">
+
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  <link rel="stylesheet" type="text/css" href="//at.alicdn.com/t/font_qt49r5gb9r8b0529.css">
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+
+<body ontouchstart="">
+    <!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+  header.intro-header{
+    
+      /* background-image: url('/covers/home/201291116105179148.jpg')  */
+      /*config*/
+    
+  }
+  
+</style>
+
+<header class="intro-header" >
+  <!-- Signature -->
+  <div id="signature">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        
+          <div class="site-heading">
+            <h1>Longwx Blog</h1>
+            <!--<hr class="small">-->
+            <span class="subheading">有一天就是今天，今天就是有一天</span>
+          </div>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <iframe style="position: absolute;top: 0;left: 0;" class="home_background" src="/libs/webGL/jq22-code7.html" frameborder="0" width="100%" height="100%"></iframe>
+  
+</header>
+
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header page-scroll">
+      <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Longwx Blog</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+    <div id="huxblog_navbar">
+      <div class="navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="/">Home</a></li>
+          <li><a href="/about/">About</a></li><li><a href="/archive/">Archives</a></li><li><a href="/tags/">Tags</a></li></ul>
+      </div>
+    </div>
+    <!-- /.navbar-collapse -->
+  </div>
+  <!-- /.container -->
+</nav>
+<script>
+  // Drop Bootstarp low-performance Navbar
+  // Use customize navbar with high-quality material design animation
+  // in high-perf jank-free CSS3 implementation
+  var $body = document.body;
+  var $toggle = document.querySelector('.navbar-toggle');
+  var $navbar = document.querySelector('#huxblog_navbar');
+  var $collapse = document.querySelector('.navbar-collapse');
+
+  $toggle.addEventListener('click', handleMagic)
+
+  function handleMagic(e) {
+    if ($navbar.className.indexOf('in') > 0) {
+      // CLOSE
+      $navbar.className = " ";
+      // wait until animation end.
+      setTimeout(function () {
+        // prevent frequently toggle
+        if ($navbar.className.indexOf('in') < 0) {
+          $collapse.style.height = "0px"
+        }
+      }, 400)
+    } else {
+      // OPEN
+      $collapse.style.height = "auto"
+      $navbar.className += " in";
+    }
+  }
+</script>
+
+
+    <!-- Main Content -->
+<div class="container">
+    <div class="row">
+        
+
+<!-- USE SIDEBAR -->
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-1
+                col-md-8 col-md-offset-1
+                col-sm-12
+                col-xs-12
+                post-container
+            ">
+            
+                <!-- Main Content -->
+
+
+<div class="post-preview">
+  <a href="/2021/12/27/web-load-performance-optimization/">
+    <h2 class="post-title">
+      再谈 web 加载性能优化——字体裁剪
+    </h2>
+    <h3 class="post-subtitle">
+      
+    </h3>
+    <div class="post-content-preview">
+      为什么要说再谈呢，顶着强烈“羞耻感”翻了翻以前写的文章，发现居然有 前端疑难问题整理-优化篇。里面好多手段这么多年过去了，依旧非常实用，甚至有些直接手段都被框架内置了。如：nextjs提供的 Image 组件拥有开箱即用的优化手段：
+
+默认的懒加载（即图片在视口外不加载图片）
+内置的图片高保真压缩能力
+响应式图片尺寸
+根据 ua 返回不同格式的图片（如 webp）
+
+最近接到了做公司官网 S......
+    </div>
+  </a>
+  
+  <p class="post-meta" style="margin: 10px 0;">
+    Posted by Wanxiang Long(Ryuurock) on
+    2021-12-27
+  </p>
+  <div class="tags">
+    
+  </div>
+  
+
+</div>
+<hr>
+
+<div class="post-preview">
+  <a href="/2021/12/01/micro-front-scratch-extensions/">
+    <h2 class="post-title">
+      scratch 应用体积优化之——微前端化 scratch extensions
+    </h2>
+    <h3 class="post-subtitle">
+      
+    </h3>
+    <div class="post-content-preview">
+      前言
+微前端 的实现好像也用不到什么突然出现的新技术，或者有什么高深莫测的概念，可近两年它就火了。早在 2016 年被 Thought Works 提出后，也好像没有掀起什么波澜，直到 19 年 20 年，qiankun 等一众微前端的框架出现后这个词才渐渐热起来。在这个概念提出前，也有 iframe 这样的解决方案达到了类似的效果，只是它不够标准化，也没有一个高大上的名字，我们只管叫它应用......
+    </div>
+  </a>
+  
+  <p class="post-meta" style="margin: 10px 0;">
+    Posted by Wanxiang Long(Ryuurock) on
+    2021-12-01
+  </p>
+  <div class="tags">
+    
+    <a href="/tags/#scratch" title="scratch">scratch</a>
+    
+    <a href="/tags/#微前端" title="微前端">微前端</a>
+    
+  </div>
+  
+
+</div>
+<hr>
+
+<div class="post-preview">
+  <a href="/2021/03/14/scratch/">
+    <h2 class="post-title">
+      Scratch 漫谈
+    </h2>
+    <h3 class="post-subtitle">
+      
+    </h3>
+    <div class="post-content-preview">
+      先引用一段来自基维百科对scratch的解释
+
+Scratch是麻省理工媒体实验室终身幼稚园组开发的一套电脑程序开发平台，目前在在150多个国家/地区使用，并提供60多种语言版本。由Mitchel Resnick和Andrés Monroy-Hernández创立。
+
+它大概长这样⬇️
+
+它一度进入编程语言排行榜第20名。
+
+对于用户来说：它功能强大，上手简单。使用自然语言+一点点逻辑就能让......
+    </div>
+  </a>
+  
+  <p class="post-meta" style="margin: 10px 0;">
+    Posted by Wanxiang Long(Ryuurock) on
+    2021-03-14
+  </p>
+  <div class="tags">
+    
+    <a href="/tags/#scratch" title="scratch">scratch</a>
+    
+  </div>
+  
+
+</div>
+<hr>
+
+<div class="post-preview">
+  <a href="/2019/11/15/blockly/">
+    <h2 class="post-title">
+      blockly初探
+    </h2>
+    <h3 class="post-subtitle">
+      图形化编程必备——blockly
+    </h3>
+    <div class="post-content-preview">
+      Blockly由google开发，scratch基于blockly创建了scratch-blocks，blockly地址https://developers.google.com/blockly/，github源码地址https://github.com/google/blockly
+Blockly工作区域名词介绍：
+
+技术介绍：
+blockly90%的视觉技术以svg为主，包括代码块、滚动......
+    </div>
+  </a>
+  
+  <p class="post-meta" style="margin: 10px 0;">
+    Posted by Wanxiang Long(Ryuurock) on
+    2019-11-15
+  </p>
+  <div class="tags">
+    
+  </div>
+  
+
+</div>
+<hr>
+
+<div class="post-preview">
+  <a href="/2019/02/20/react-hoc-reverse-extend/">
+    <h2 class="post-title">
+      React高阶组件之反向继承
+    </h2>
+    <h3 class="post-subtitle">
+      
+    </h3>
+    <div class="post-content-preview">
+      高阶组件（HOC）相信大伙儿都不陌生，但是很少有看到介绍反向继承的。
+先介绍背景：
+博主有一部分的工作时间是在开发内部使用的管理系统的，渐渐发现，90%的页面具有类似的UI，像这样
+
+配合自研的框架+ant design，其实实现起来已经非常的容易了，编辑好searchFields，columnsFields，然后组织数据就能渲染出搜索表单和数据列表项。有的然后大部分页面有操作，审核、编辑等......
+    </div>
+  </a>
+  
+  <p class="post-meta" style="margin: 10px 0;">
+    Posted by Wanxiang Long(Ryuurock) on
+    2019-02-20
+  </p>
+  <div class="tags">
+    
+    <a href="/tags/#react" title="react">react</a>
+    
+  </div>
+  
+
+</div>
+<hr>
+
+<div class="post-preview">
+  <a href="/2018/11/25/frontend-interview/">
+    <h2 class="post-title">
+      一篇前端面试题的作业
+    </h2>
+    <h3 class="post-subtitle">
+      
+    </h3>
+    <div class="post-content-preview">
+      原文地址：2019年前端面试都聊啥？一起来看看
+有一些问题自己的答案不是很清楚，所以直接实践后贴出来
+基本的JavaScript问题
+使以下代码正常运行：
+
+参考答案：
+123456Array.prototype.multiply = function() &#123;  this.push(...this.map(item =&gt; Math.pow(item, 2)));&#125; ......
+    </div>
+  </a>
+  
+  <p class="post-meta" style="margin: 10px 0;">
+    Posted by Wanxiang Long(Ryuurock) on
+    2018-11-25
+  </p>
+  <div class="tags">
+    
+    <a href="/tags/#面试" title="面试">面试</a>
+    
+  </div>
+  
+
+</div>
+<hr>
+
+<div class="post-preview">
+  <a href="/2018/10/21/new-web-components/">
+    <h2 class="post-title">
+      不一样的Web Components——Shadow DOM
+    </h2>
+    <h3 class="post-subtitle">
+      
+    </h3>
+    <div class="post-content-preview">
+      在Reactjs、Vuejs和Angular大行其道的今天，大家所熟知的web组件更多的是由框架本身定义的一套组件规范，如Reactjs的组件是一个js或者jsx文件，里面可以直接写类似于html标签的代码。Vuejs推崇的“关注点分离”自己创造了一种文件格式.vue作为组件，里面可以直接写web的“三剑客”：html、js和css。而angular（2.x以上）则不同于前面两者，官方示例则......
+    </div>
+  </a>
+  
+  <p class="post-meta" style="margin: 10px 0;">
+    Posted by Wanxiang Long(Ryuurock) on
+    2018-10-21
+  </p>
+  <div class="tags">
+    
+  </div>
+  
+
+</div>
+<hr>
+
+<div class="post-preview">
+  <a href="/2018/06/09/nginx-use/">
+    <h2 class="post-title">
+      记一次博客从http到https的迁移（nginx的使用）
+    </h2>
+    <h3 class="post-subtitle">
+      
+    </h3>
+    <div class="post-content-preview">
+      最近心血来潮，想把一件一直没干的事情干了——把博客迁移到国外的vps。至于为什么迁，一是国内的vps租不起，二是在国内假网站那漫长的备案时间就够感人了，三是放到github.io上面百度的spider爬不到，影响我优秀的博客的曝光率（#手动滑稽）。多方查证后，原来是因为百度的爬取频率太高，给服务器造成压力，所以github不喜欢这样的spider，所以直接403了。
+反正最近什么都到期了，去......
+    </div>
+  </a>
+  
+  <p class="post-meta" style="margin: 10px 0;">
+    Posted by Wanxiang Long(Ryuurock) on
+    2018-06-09
+  </p>
+  <div class="tags">
+    
+    <a href="/tags/#nginx" title="nginx">nginx</a>
+    
+  </div>
+  
+
+</div>
+<hr>
+
+<div class="post-preview">
+  <a href="/2018/05/18/canvas-particale/">
+    <h2 class="post-title">
+      canvas粒子效果初探
+    </h2>
+    <h3 class="post-subtitle">
+      我是谁我在哪儿
+    </h3>
+    <div class="post-content-preview">
+      在这之前对canvas这个标签还一直停留在
+
+效果炫酷
+api复杂难懂
+
+好吧，直到今天我也是这么觉得，但是好在已经有很多详细的文档和例子来帮我们理解这些api。
+今天我们要做的canvas粒子效果如下图所示
+
+踩坑：
+canvas这个标签，设置宽高的时候是要使用标签的width和height属性来设置的，不能通过style的宽高来设置，否则会造成绘制出来的图形很模糊并且位置产生偏移
+废话不......
+    </div>
+  </a>
+  
+  <p class="post-meta" style="margin: 10px 0;">
+    Posted by Wanxiang Long(Ryuurock) on
+    2018-05-18
+  </p>
+  <div class="tags">
+    
+    <a href="/tags/#canvas" title="canvas">canvas</a>
+    
+  </div>
+  
+
+</div>
+<hr>
+
+<div class="post-preview">
+  <a href="/2018/03/16/new-work-new-life/">
+    <h2 class="post-title">
+      新工作，新生活
+    </h2>
+    <h3 class="post-subtitle">
+      我没想到会把这种口水话记录在博客里，也算是对职业生涯的记录吧
+    </h3>
+    <div class="post-content-preview">
+      我没想到会把这种口水话记录在博客里，也算是对职业生涯的记录吧。
+“微知”是我第一个参与孵化的项目。回想这两年多一路走来，每个加班的夜晚都历历在目。
+朋友说我“真能呆”，一呆就是在一个小公司呆了两年。我想大概是因为爱？微知从无到有，再到试图推广、试图融资、试图转型，都记录在了这五六十次上线发布里了。
+从祖传的多页到引入requireJs模块化开发，再到过渡到webpack，都是我一手慢慢调教过......
+    </div>
+  </a>
+  
+  <p class="post-meta" style="margin: 10px 0;">
+    Posted by Wanxiang Long(Ryuurock) on
+    2018-03-16
+  </p>
+  <div class="tags">
+    
+    <a href="/tags/#job" title="job">job</a>
+    
+  </div>
+  
+
+</div>
+<hr>
+
+
+<!-- Pager -->
+<ul class="pager">
+  
+  
+  <li class="next">
+    <a href="/archives/2/">Older Posts &rarr;</a>
+  </li>
+  
+</ul>
+
+
+                <!-- 如果开启评论功能 -->
+                
+            </div>
+
+          <!-- Sidebar Container -->
+<div class="
+    col-lg-3 col-lg-offset-0
+    col-md-3 col-md-offset-0
+    col-sm-12
+    col-xs-12
+    sidebar-container
+">
+  
+  <!-- Featured Tags -->
+
+<section>
+  <!-- no hr -->
+  <h5><a href="/tags/">FEATURED TAGS</a></h5>
+  <div class="tags">
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <a href="/tags/#headless" title="headless"
+      rel="2">headless</a>
+    
+    
+    
+    
+    
+    
+    
+    <a href="/tags/#javascript" title="javascript"
+      rel="5">javascript</a>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <a href="/tags/#webpack" title="webpack"
+      rel="3">webpack</a>
+    
+    
+    
+    <a href="/tags/#nodejs" title="nodejs"
+      rel="3">nodejs</a>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <a href="/tags/#scratch" title="scratch"
+      rel="2">scratch</a>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <a href="/tags/#websocket" title="websocket"
+      rel="2">websocket</a>
+    
+    
+    
+    
+    
+    
+    
+    
+  </div>
+</section>
+
+
+  <hr>
+  
+  <!-- Short About -->
+<section class="visible-md visible-lg">
+  <h5><a href="/about/">ABOUT ME</a></h5>
+  <div class="short-about">
+
+    
+    <img id="avatar_pic" src="/covers/common/userface.jpg" />
+    
+
+    
+    <p>Hi, I&#39;m Ryuurock</p>
+    
+
+    <!-- SNS Link -->
+    <ul class="list-inline">
+      
+      
+      
+
+      
+      <li>
+        <a target="_blank" href="http://weibo.com/2539035205">
+          <span class="fa-stack fa-lg">
+            <i class="fa fa-circle fa-stack-2x"></i>
+            <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+          </span>
+        </a>
+      </li>
+      
+
+      
+
+      
+      <li>
+        <a target="_blank" href="https://github.com/Ryuurock">
+          <span class="fa-stack fa-lg">
+            <i class="fa fa-circle fa-stack-2x"></i>
+            <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+          </span>
+        </a>
+      </li>
+      
+
+
+      
+
+      
+      <li>
+        <a href="mailto:lwx_1993@outlook.com">
+          <span class="fa-stack fa-lg">
+            <i class="fa fa-circle fa-stack-2x"></i>
+            <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+          </span>
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+</section>
+
+  <hr>
+  
+  
+  <h5>RECENT POSTS</h3>
+  <div class="widget">
+    <ul>
+      <li>
+        <a href="/2021/12/27/web-load-performance-optimization/">再谈 web 加载性能优化——字体裁剪</a>
+      </li>
+    
+      <li>
+        <a href="/2021/12/01/micro-front-scratch-extensions/">scratch 应用体积优化之——微前端化 scratch extensions</a>
+      </li>
+    
+      <li>
+        <a href="/2021/03/14/scratch/">Scratch 漫谈</a>
+      </li>
+    
+      <li>
+        <a href="/2019/11/15/blockly/">blockly初探</a>
+      </li>
+    
+      <li>
+        <a href="/2019/02/20/react-hoc-reverse-extend/">React高阶组件之反向继承</a>
+      </li>
+    </ul>
+  </div>
+
+
+  <hr>
+  
+</div>
+
+
+        
+    </div>
+</div>
+
+
+    <!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center">
+          
+          
+          
+
+          
+          <li>
+            <a target="_blank" href="http://weibo.com/2539035205">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a target="_blank" href="https://github.com/Ryuurock">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a href="mailto:lwx_1993@outlook.com">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+        </ul>
+        <p class="copyright text-muted">
+          Wanxiang Long(Ryuurock) &copy; 1993-2022
+          <br>
+          <span id="busuanzi_container_site_uv">小站访客数<span id="busuanzi_value_site_uv"></span>人次</span>
+          |
+          <span id="busuanzi_container_site_pv">小站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/lx-blog.js"></script>
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- async load function -->
+<script>
+  function async (u, c) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) {
+      o.addEventListener('load', function (e) {
+        c(null, e);
+      }, false);
+    }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+  // only load tagcloud.js in tag.html
+  if ($('#tag_cloud').length !== 0) {
+    async ("/js/jquery.tagcloud.js", function () {
+      $.fn.tagcloud.defaults = {
+        //size: {start: 1, end: 1, unit: 'em'},
+        color: {
+          start: '#bbbbee',
+          end: '#0085a1'
+        },
+      };
+      $('#tag_cloud a').tagcloud();
+    })
+  }
+</script>
+
+<!--fastClick.js -->
+<script>
+  async ("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    var $nav = document.querySelector("nav");
+    if ($nav) FastClick.attach($nav);
+  })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+    <a id="rocket" href="#top" class="iconfont icon-23435"></a>
+    <script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+    <!-- Image to hack wechat -->
+    <!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+    <!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="baidu-site-verification" content="code-Hn2FTkozwu" />
+  <meta name="google-site-verification" content="VRegEMvasrnJoWUYvftfL9jaiIF1ovA-dZPb4juzyCA" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="keyword" content="Web前端|前端|javascript|css|html|html5">
+  <link rel="icon" href="/favicon.ico">
+  <!-- Place this tag in your head or just before your close body tag. -->
+  <title>
+    
+    webpack下html内容相关的处理 - longwanxiang的博客 | Ryuurock | Web前端实习生
+    
+  </title>
+  <link rel="canonical" href="https://ryuurock.github.io/2018/01/20/custom-webpack-html-handle-plugin/">
+  <!-- Custom Fonts -->
+  <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+  <!-- Hux change font-awesome CDN to qiniu -->
+  <link href="//cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <!-- Bootstrap Core CSS -->
+  
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+  <!-- Custom CSS -->
+  
+<link rel="stylesheet" href="/css/beantech.min.css">
+
+  <!-- Pygments Highlight CSS -->
+  
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+<link rel="stylesheet" href="/css/widget.css">
+
+  
+<link rel="stylesheet" href="/css/rocket.css">
+
+  
+<link rel="stylesheet" href="/css/signature.css">
+
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  <link rel="stylesheet" type="text/css" href="//at.alicdn.com/t/font_qt49r5gb9r8b0529.css">
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+
+<body ontouchstart="">
+    <!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+  header.intro-header{
+    
+      background-image: url('/covers/post/IMG_3312.JPG')
+      /*post*/
+    
+  }
+  
+</style>
+
+<header class="intro-header" >
+  <!-- Signature -->
+  <div id="signature">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        
+          <div class="post-heading">
+            <div class="tags">
+                
+                  <a class="tag" href="/tags/#webpack" title="webpack">webpack</a>
+                
+                  <a class="tag" href="/tags/#nodejs" title="nodejs">nodejs</a>
+                
+            </div>
+            <h1>webpack下html内容相关的处理</h1>
+            <h2 class="subheading"></h2>
+            <span class="meta">
+                Posted by Wanxiang Long(Ryuurock) on
+                2018-01-20
+            </span>
+          </div>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</header>
+
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header page-scroll">
+      <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Longwx Blog</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+    <div id="huxblog_navbar">
+      <div class="navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="/">Home</a></li>
+          <li><a href="/about/">About</a></li><li><a href="/archive/">Archives</a></li><li><a href="/tags/">Tags</a></li></ul>
+      </div>
+    </div>
+    <!-- /.navbar-collapse -->
+  </div>
+  <!-- /.container -->
+</nav>
+<script>
+  // Drop Bootstarp low-performance Navbar
+  // Use customize navbar with high-quality material design animation
+  // in high-perf jank-free CSS3 implementation
+  var $body = document.body;
+  var $toggle = document.querySelector('.navbar-toggle');
+  var $navbar = document.querySelector('#huxblog_navbar');
+  var $collapse = document.querySelector('.navbar-collapse');
+
+  $toggle.addEventListener('click', handleMagic)
+
+  function handleMagic(e) {
+    if ($navbar.className.indexOf('in') > 0) {
+      // CLOSE
+      $navbar.className = " ";
+      // wait until animation end.
+      setTimeout(function () {
+        // prevent frequently toggle
+        if ($navbar.className.indexOf('in') < 0) {
+          $collapse.style.height = "0px"
+        }
+      }, 400)
+    } else {
+      // OPEN
+      $collapse.style.height = "auto"
+      $navbar.className += " in";
+    }
+  }
+</script>
+
+
+    <!-- Modify by Yu-Hsuan Yen -->
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>没错这次还是讲webpack，这玩意儿给前端创造了太多的灵活性了，让我们不得不好好的来学习它。<br>
+最近项目的上线第一次文件发布会漏掉一个文件，原因就是文件正好不在我们常用的目录，在合并的时候就忘记了。继上次文件结构重构后，一直还有几个模板文件在后端的目录结构里，原因就是我们在html的引用方式是采用的后端模板引标签用</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">include</span> <span class="attr">file</span>=<span class="string">&quot;...&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这种写法的弊端就是必须要将文件放在后端目录里，因为上线后前端资源文件不在一个服务器。为了减少这种失误，我决定将这些模板拿走，放到我们前端目录里，达到前后端“文件分离”。<br>
+现在就使用的<code>html-webpack-plugin</code>插件来说，是部分支持ejs模板的，<br>
+但仅仅是一些变量的输出等，对于html文件的引用我们还需要单独配置<code>html-loader</code>这个插件，不幸的是配置这个loader后，html-webpack-plugin将不再支持ejs的模板处理，并且ejs-loader和html-loader并不来能完美的结合起来，因为ejs-loader返回的是一个处理函数。好了废话不多说，下面介绍下我的解决办法吧。<br>
+之所以非得使用html-loader是看中了它的url提取，它的核心函数将图片css、js等都提取出来了，在一些特殊情况这个是非常有用的，免于我们去拷贝文件。查阅官方文档后，发现它是支持es6的模板语法的，并且官方也示例了模板语法的使用，Interpolation</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;img src=<span class="string">&quot;$&#123;require(`./images/gallery.png`)&#125;&quot;</span>&gt;</span><br><span class="line"><span class="xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span>$&#123;require(&#x27;./components/gallery.html&#x27;)&#125;<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br></pre></td></tr></table></figure>
+<p>但是因为个别页面需要静态传值到模板里，暂时还无法做到去解析里面的变量。<br>
+然后我们先从主入口的模板说起：<br>
+<code>html-webpack-plugin</code>文档里有提到这个插件的事件，</p>
+<h4 id="To-allow-other-plugins-to-alter-the-HTML-this-plugin-executes-the-following-events"><a class="anchorjs-link" href="#To-allow-other-plugins-to-alter-the-HTML-this-plugin-executes-the-following-events"></a>To allow other plugins to alter the HTML this plugin executes the following events:</h4>
+<p>Async:</p>
+<ul>
+<li>html-webpack-plugin-before-html-generation</li>
+<li>html-webpack-plugin-before-html-processing</li>
+<li>html-webpack-plugin-alter-asset-tags</li>
+<li>html-webpack-plugin-after-html-processing</li>
+<li>html-webpack-plugin-after-emit</li>
+</ul>
+<p>Sync:</p>
+<ul>
+<li>html-webpack-plugin-alter-chunks</li>
+</ul>
+<p>这些事件都是在<code>html-webpack-plugin</code>整个生命周期中发生的，还有一些官方没有提到的，在源码里可以找到，不过对于目前来说用处不大，在这里我们用<code>html-webpack-plugin-before-html-processing</code>，就是在html加工前，我们要对里面的ejs语法进行处理，代码如下</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> ejs = <span class="built_in">require</span>( <span class="string">&#x27;ejs&#x27;</span> );</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="class"><span class="keyword">class</span> <span class="title">HtmlEjsWebpackPlugin</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="title">constructor</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="title">apply</span>(<span class="params"> compiler </span>)</span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    compiler.plugin( <span class="string">&#x27;compilation&#x27;</span>, <span class="function"><span class="keyword">function</span>(<span class="params"> compilation </span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">      compilation.plugin( <span class="string">&#x27;html-webpack-plugin-before-html-processing&#x27;</span>, <span class="function"><span class="keyword">function</span>(<span class="params"> htmlPluginData, callback </span>) </span>&#123;</span><br><span class="line">        htmlPluginData.html = ejs.render( htmlPluginData.html, &#123;</span><br><span class="line">          <span class="attr">customData</span>: htmlPluginData.plugin.options.customData || &#123;&#125;</span><br><span class="line">        &#125; );</span><br><span class="line">        callback( <span class="literal">null</span>, htmlPluginData );</span><br><span class="line">      &#125; );</span><br><span class="line"></span><br><span class="line">    &#125; );</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>这里的customData是我们的自定义数据，比如title keywords等，用来静态生成html内容。然后就是html-loader，为了方便，我们可以直接声明一个nodejs的全局函数:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 声明一个全局的ejsRender函数</span></span><br><span class="line"><span class="built_in">global</span>.ejsRender = ejs.render;</span><br></pre></td></tr></table></figure>
+<p>这样我们就可以在html代码里这样写</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">$&#123;ejsRender( require(&#x27;$d/js/components/search_material.html&#x27;), &#123; title: &#x27;账号&#x27; &#125; )&#125;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>这样我们可以去html里取到传进去的变量</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>&lt;%- title %&gt;<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>输出</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>账号<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这样变量相关的我们就处理完了，还有一个比较重要的是html的parse，对于一些嵌套了后端写法的地方，html-minifier是无法解析的，比如：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">a</span> &lt;<span class="attr">if</span> <span class="attr">condition</span>=<span class="string">&quot;$bannerItem[&#x27;activity_url&#x27;]&quot;</span>&gt;</span>href=&quot;&#123;$bannerItem[&#x27;activity_url&#x27;]&#125;&quot; &#123;$bannerItem[&#x27;isblankopen&#x27;] == &#x27;1&#x27; ? &#x27;target=&quot;_blank&quot;&#x27; : &#x27;&#x27;&#125;<span class="tag">&lt;/<span class="name">if</span>&gt;</span>&gt;<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>再比如：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">&quot;__RESPATH__/images/hy&#123;$_SESSION[&#x27;vip&#x27;]|default=&#x27;0&#x27;&#125;.png&quot;</span> <span class="attr">class</span>=<span class="string">&quot;vip-logo&quot;</span> <span class="attr">alt</span>=<span class="string">&quot;vip标识&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+<p>所以我们再看文档<code>ignoreCustomFragments</code>、<code>customAttrSurround</code>、<code>customAttrAssign</code>我们需要配置这些属性，它会传给html-minifier。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">ignoreCustomFragments</span>: [ <span class="regexp">/&lt;if[\s\S]*?&gt;[\s\S]*?&lt;\/if&gt;/</span>, <span class="regexp">/&lt;%[\s\S]*?%&gt;/</span>, <span class="regexp">/\&#123;\$[\s\S]*?\&#125;/</span>, <span class="regexp">/\&#123;\:[\s\S]*?\&#125;/</span> ],</span><br><span class="line">  <span class="attr">customAttrSurround</span>: [</span><br><span class="line">    [ <span class="regexp">/\&#123;\$/</span>, <span class="regexp">/\&#125;/</span> ],</span><br><span class="line">    [ <span class="regexp">/&lt;if[\s\S]*?&gt;/</span>, <span class="regexp">/&lt;\/if&gt;/</span> ]</span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">customAttrAssign</span>: [ <span class="regexp">/\&#123;\$[\s\S]*?\&#125;/</span>, <span class="regexp">/\&#123;\:[\s\S]*?\&#125;/</span> ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>就是指定规则的内容不检查，直接跳过，html-minifier的文档里有详细的说明。<br>
+这样一来我们就可以完全将前后端文件拆开来了，不用受后端限制非得放在哪个文件夹，因为nodejs已经帮我们做了（html-webpack-plugin配合html-webpack-harddisk-plugin插件）。</p>
+
+
+                <hr>
+                <!-- Pager -->
+                <ul class="pager clearfix">
+                    
+                    <li class="previous">
+                        <a href="/2018/02/10/chrome-headless-spear-and-shield/" data-toggle="tooltip" data-placement="top"
+                            title="Chrome Headless下的矛与盾">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2018/01/09/puppeteer/" data-toggle="tooltip" data-placement="top"
+                            title="Puppeteer 初探">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+
+                <!-- UY BEGIN -->
+                <br>
+                <div id="uyan_frame"></div>
+                <!--<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2138668"></script>-->
+                <!-- UY END -->
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+
+<aside id="sidebar">
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">Contents</strong>
+    
+    <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#To-allow-other-plugins-to-alter-the-HTML-this-plugin-executes-the-following-events"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">To allow other plugins to alter the HTML this plugin executes the following events:</span></a></li></ol>
+    
+  </div>
+</aside>
+
+
+
+
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#webpack"
+                            title="webpack">webpack</a>
+                        
+                        <a class="tag" href="/tags/#nodejs"
+                            title="nodejs">nodejs</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async (u, c) {
+        var d = document,
+            t = 'script',
+            o = d.createElement(t),
+            s = d.getElementsByTagName(t)[0];
+        o.src = u;
+        if (c) {
+            o.addEventListener('load', function (e) {
+                c(null, e);
+            }, false);
+        }
+        s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+    <!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center">
+          
+          
+          
+
+          
+          <li>
+            <a target="_blank" href="http://weibo.com/2539035205">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a target="_blank" href="https://github.com/Ryuurock">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a href="mailto:lwx_1993@outlook.com">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+        </ul>
+        <p class="copyright text-muted">
+          Wanxiang Long(Ryuurock) &copy; 1993-2022
+          <br>
+          <span id="busuanzi_container_site_uv">小站访客数<span id="busuanzi_value_site_uv"></span>人次</span>
+          |
+          <span id="busuanzi_container_site_pv">小站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/lx-blog.js"></script>
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- async load function -->
+<script>
+  function async (u, c) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) {
+      o.addEventListener('load', function (e) {
+        c(null, e);
+      }, false);
+    }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+  // only load tagcloud.js in tag.html
+  if ($('#tag_cloud').length !== 0) {
+    async ("/js/jquery.tagcloud.js", function () {
+      $.fn.tagcloud.defaults = {
+        //size: {start: 1, end: 1, unit: 'em'},
+        color: {
+          start: '#bbbbee',
+          end: '#0085a1'
+        },
+      };
+      $('#tag_cloud a').tagcloud();
+    })
+  }
+</script>
+
+<!--fastClick.js -->
+<script>
+  async ("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    var $nav = document.querySelector("nav");
+    if ($nav) FastClick.attach($nav);
+  })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+    <a id="rocket" href="#top" class="iconfont icon-23435"></a>
+    <script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+    <!-- Image to hack wechat -->
+    <!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+    <!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="baidu-site-verification" content="code-Hn2FTkozwu" />
+  <meta name="google-site-verification" content="VRegEMvasrnJoWUYvftfL9jaiIF1ovA-dZPb4juzyCA" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="keyword" content="Web前端|前端|javascript|css|html|html5">
+  <link rel="icon" href="/favicon.ico">
+  <!-- Place this tag in your head or just before your close body tag. -->
+  <title>
+    
+    Puppeteer 初探 - longwanxiang的博客 | Ryuurock | Web前端实习生
+    
+  </title>
+  <link rel="canonical" href="https://ryuurock.github.io/2018/01/09/puppeteer/">
+  <!-- Custom Fonts -->
+  <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+  <!-- Hux change font-awesome CDN to qiniu -->
+  <link href="//cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <!-- Bootstrap Core CSS -->
+  
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+  <!-- Custom CSS -->
+  
+<link rel="stylesheet" href="/css/beantech.min.css">
+
+  <!-- Pygments Highlight CSS -->
+  
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+<link rel="stylesheet" href="/css/widget.css">
+
+  
+<link rel="stylesheet" href="/css/rocket.css">
+
+  
+<link rel="stylesheet" href="/css/signature.css">
+
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  <link rel="stylesheet" type="text/css" href="//at.alicdn.com/t/font_qt49r5gb9r8b0529.css">
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+
+<body ontouchstart="">
+    <!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+  header.intro-header{
+    
+      background-image: url('/covers/post/11515505465_.pic_hd.jpg')
+      /*post*/
+    
+  }
+  
+</style>
+
+<header class="intro-header" >
+  <!-- Signature -->
+  <div id="signature">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        
+          <div class="post-heading">
+            <div class="tags">
+                
+                  <a class="tag" href="/tags/#headless" title="headless">headless</a>
+                
+                  <a class="tag" href="/tags/#nodejs" title="nodejs">nodejs</a>
+                
+            </div>
+            <h1>Puppeteer 初探</h1>
+            <h2 class="subheading">无头浏览器给了我们一个完美的浏览器运行环境，我们可以用代码来模拟一个网站去做任何想做的事</h2>
+            <span class="meta">
+                Posted by Wanxiang Long(Ryuurock) on
+                2018-01-09
+            </span>
+          </div>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</header>
+
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header page-scroll">
+      <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Longwx Blog</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+    <div id="huxblog_navbar">
+      <div class="navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="/">Home</a></li>
+          <li><a href="/about/">About</a></li><li><a href="/archive/">Archives</a></li><li><a href="/tags/">Tags</a></li></ul>
+      </div>
+    </div>
+    <!-- /.navbar-collapse -->
+  </div>
+  <!-- /.container -->
+</nav>
+<script>
+  // Drop Bootstarp low-performance Navbar
+  // Use customize navbar with high-quality material design animation
+  // in high-perf jank-free CSS3 implementation
+  var $body = document.body;
+  var $toggle = document.querySelector('.navbar-toggle');
+  var $navbar = document.querySelector('#huxblog_navbar');
+  var $collapse = document.querySelector('.navbar-collapse');
+
+  $toggle.addEventListener('click', handleMagic)
+
+  function handleMagic(e) {
+    if ($navbar.className.indexOf('in') > 0) {
+      // CLOSE
+      $navbar.className = " ";
+      // wait until animation end.
+      setTimeout(function () {
+        // prevent frequently toggle
+        if ($navbar.className.indexOf('in') < 0) {
+          $collapse.style.height = "0px"
+        }
+      }, 400)
+    } else {
+      // OPEN
+      $collapse.style.height = "auto"
+      $navbar.className += " in";
+    }
+  }
+</script>
+
+
+    <!-- Modify by Yu-Hsuan Yen -->
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>在GitHub上面google官方是这样介绍<code>Puppeteer</code>的</p>
+<blockquote>
+<p>Puppeteer is a Node library which provides a high-level API to control headless Chrome or Chromium over the DevTools Protocol. It can also be configured to use full (non-headless) Chrome or Chromium.</p>
+</blockquote>
+<p>它是一个nodejs的API库，我们可以用它来操作一个浏览器，<code>headless</code>模式就是在内存里运行，不用启动界面，因为我们将它交给代码来控制。下面来说说我实际使用puppeteer的例子</p>
+<h4 id="网页截图"><a class="anchorjs-link" href="#网页截图"></a>网页截图</h4>
+<p>这个功能可以说是一个特色功能了，虽然已经有<code>phantomjs</code>这种，但是实际的出图效果和肉眼看到的效果相差甚远，当然只是在一些css3样式下面会有这种情况，可能是编译的版本比较旧吧。前几日在逛掘金的时候看到有人发帖介绍这个puppeteer，重点介绍了截图的功能。突然想到公司项目里“截长图”这个万年难题，总是有这样那样的样式问题。于是我抽出了点时间照着Demo做了一份出来试试我们出问题的样式在它下面的截图效果。效果真的是非常非常好。下面是从安装到截图的步骤</p>
+<p>首先在项目里安装puppeteer</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install puppeteer --ignore-scripts</span><br></pre></td></tr></table></figure>
+<p>这里的<code>--ignore-scripts</code>是为了忽略包里的安装命令，因为这个命令要下载chrome，但是通常都无法下载，需要手动下载。<br>
+使用这个命令安装好后我们就需要手动去下载chrome了，找到<code>node_modules/puppeteer/utils/ChromiumDownloader.js</code>第95行（可能会因为代码更新有所变动）找到</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">url = util.format(url, downloadHost, revision)</span><br></pre></td></tr></table></figure>
+<p>在下面输出url（<code>console.log(url)</code>），再去到puppeteer目录里，运行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node install.js</span><br></pre></td></tr></table></figure>
+<p>得到输出的地址，然后再用下载工具下载。之后上传到一个支持https的云端上面，如七牛，反正能够通过https直接访问到资源就行了，再将这个链接重新赋值给url这个变量保存后再运行一次<code>node install.js</code>这样chrome就装好了然后我们就可以写代码了，下面是最简单的例子</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> puppeteer = <span class="built_in">require</span>(<span class="string">&#x27;puppeteer&#x27;</span>);</span><br><span class="line"></span><br><span class="line">(<span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">  <span class="comment">// 启动浏览器</span></span><br><span class="line">  <span class="keyword">const</span> browser = <span class="keyword">await</span> puppeteer.launch();</span><br><span class="line">  <span class="comment">// 打开一个标签页，这里称为page</span></span><br><span class="line">  <span class="keyword">const</span> page = <span class="keyword">await</span> browser.newPage();</span><br><span class="line">  <span class="comment">// 去到你想截图的页面</span></span><br><span class="line">  <span class="keyword">await</span> page.goto(<span class="string">&#x27;https://example.com&#x27;</span>);</span><br><span class="line">  <span class="comment">// 调用截图api</span></span><br><span class="line">  <span class="keyword">await</span> page.screenshot(&#123;<span class="attr">path</span>: <span class="string">&#x27;example.png&#x27;</span>&#125;);</span><br><span class="line">  <span class="comment">// 关闭浏览器</span></span><br><span class="line">  <span class="keyword">await</span> browser.close();</span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure>
+<p>几乎所有的api都返回一个<code>Promise</code>，为了不陷入无穷无尽的回调，我们在这里选择<code>async/await</code>语法，所以需要较新的nodejs版本。当然，实际使用中是不会这么简单的，比如我们截图截的是长图，并且需要将文件直接返回出去，所以我们可以不用保存文件到本地，查看文档后知道<code>screenshot</code>方法返回的是一个Promise<Buffer>，我们可以直接将buffer相应给请求。配合<code>express</code>可以这样（当然为了易于维护和扩展，代码肯定不会这么写）</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> app = <span class="built_in">require</span>( <span class="string">&#x27;express&#x27;</span> )()</span><br><span class="line"></span><br><span class="line">app.get( <span class="string">&#x27;/get-screenshot&#x27;</span>, <span class="keyword">async</span> <span class="function"><span class="keyword">function</span>(<span class="params"> req, res </span>) </span>&#123;</span><br><span class="line">  <span class="comment">// 启动浏览器</span></span><br><span class="line">  <span class="keyword">const</span> browser = <span class="keyword">await</span> puppeteer.launch();</span><br><span class="line">  <span class="comment">// 打开一个标签页，这里称为page</span></span><br><span class="line">  <span class="keyword">const</span> page = <span class="keyword">await</span> browser.newPage();</span><br><span class="line">  <span class="comment">// 去到你想截图的页面</span></span><br><span class="line">  <span class="keyword">await</span> page.goto(<span class="string">&#x27;https://example.com&#x27;</span>);</span><br><span class="line">  <span class="comment">// 调用截图api</span></span><br><span class="line">  <span class="keyword">const</span> image = <span class="keyword">await</span> page.screenshot();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 为了能够让浏览器自动下载，我们需要再设置响应头</span></span><br><span class="line">  res.setHeader(<span class="string">&#x27;content-type&#x27;</span>, <span class="string">&#x27;image/png&#x27;</span>)</span><br><span class="line">  res.setHeader(<span class="string">&#x27;content-disposition&#x27;</span>, <span class="string">&#x27;attachment; filename=&quot;image.png&quot;&#x27;</span>)</span><br><span class="line">  </span><br><span class="line">  res.send( image )</span><br><span class="line">&#125; )</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">app.listen(<span class="number">8080</span>)</span><br></pre></td></tr></table></figure>
+<p>其实这里可以优化一下，我们都知道启动一个程序是很耗时的，我们可以在nodejs服务启动的时候就把浏览器启动起来，当截图请求发起的时候再去打开一个标签页，再截图，完成后再关闭标签页就能节约很多时间。<br>
+还有很多细节的问题这里就不再赘述了，比如截图的质量，截图的文件类型png/jpg，等待图片全部加载完成再发起截图，关于截图这一块官方提供了好几个参数来控制，感兴趣的可以看官方的文档<a target="_blank" rel="noopener" href="https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md">puppeteer</a></p>
+<h4 id="浏览器操控"><a class="anchorjs-link" href="#浏览器操控"></a>浏览器操控</h4>
+<p>这算是它的核心功能了，如果要模拟一个用户的行为去访问一个网页，肯定少不了交互，鼠标、键盘和触摸等等，这些puppeteer全都可以做到，举个简单的例子，有些数据必须要鼠标点击、拖动、滚轮滚动才会产生，这个时候用一些后端语言是无法模拟的，这个时候就需要调用api去操控浏览器来完成操作。<br>
+实际需求：使用后端程序登陆一个网站后去访问一些接口，但是登陆的时候有一个验证，需要用户使用鼠标拉动一个滑块到最后再释放鼠标生成登陆票据才能验证通过，像这样<br>
+<img src="QQ20180109-225305.png" alt=""><br>
+这种使用纯代码是很难验证通过的，但是使用一个浏览器环境的话就简单多了，于是我们想到使用nodejs作为服务来专门获取用于登陆的参数，下面是用来模拟用户滑动滑块的代码</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> puppeteer = <span class="built_in">require</span>(<span class="string">&#x27;puppeteer&#x27;</span>);</span><br><span class="line"></span><br><span class="line">(<span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">  <span class="comment">// 启动浏览器</span></span><br><span class="line">  <span class="keyword">const</span> browser = <span class="keyword">await</span> puppeteer.launch();</span><br><span class="line">  <span class="comment">// 打开一个标签页，这里称为page</span></span><br><span class="line">  <span class="keyword">const</span> page = <span class="keyword">await</span> browser.newPage();</span><br><span class="line">  <span class="comment">// 去到你想截图的页面</span></span><br><span class="line">  <span class="keyword">await</span> page.goto(<span class="string">&#x27;https://example.com&#x27;</span>);</span><br><span class="line">  <span class="comment">// 将鼠标移动到这里</span></span><br><span class="line">  <span class="keyword">await</span> page.mouse.move(<span class="number">1020</span>, <span class="number">250</span>);</span><br><span class="line">  <span class="comment">// 按下鼠标</span></span><br><span class="line">  <span class="keyword">await</span> page.mouse.down()</span><br><span class="line">  <span class="comment">// 将鼠标移动（模拟用户拖动的动作）</span></span><br><span class="line">  <span class="keyword">await</span> page.mouse.move( <span class="number">1266</span>, <span class="number">250</span>, &#123; <span class="attr">step</span>: <span class="number">240</span> &#125; )</span><br><span class="line">  <span class="comment">// 释放鼠标</span></span><br><span class="line">  <span class="keyword">await</span> page.mouse.up()</span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure>
+<p>此时我们就能完成滑动验证以生成用于登录的票据，再取出来返回出去，调用者就可以使用这个票据来模拟用户登录了。<br>
+这里的<code>step</code>非常重要，尽量以两次移动的x坐标的差值来设定它，因为这个滑动组件就是这样来判断是否是用户行为的（当然有了puppeteer我们连真人都可以伪装了），如果不设置step，虽然一样可以将滑块滑过去，但是是无法验证成功。<br>
+还有个很重要的api忘了介绍，就是page下面的<code>evaluate</code>方法，参数是Function或者String，函数或者字符串会被传递到chrome里面执行，再将结果返回出去，这样我们就可以取得页面上或者js里面的值了。</p>
+<p>到最后其实我发现了它的一个bug，最后输出的图片会在垂直方向的第16000像素多一点的地方开始断掉并从网页最头部开始重复，这让人有点懊恼，尝试了一些办法都没有解决，无奈提了<a target="_blank" rel="noopener" href="https://github.com/GoogleChrome/puppeteer/issues/1752">issue</a>，希望官方能够解决，</p>
+
+
+                <hr>
+                <!-- Pager -->
+                <ul class="pager clearfix">
+                    
+                    <li class="previous">
+                        <a href="/2018/01/20/custom-webpack-html-handle-plugin/" data-toggle="tooltip" data-placement="top"
+                            title="webpack下html内容相关的处理">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2017/12/10/node-websocket-server/" data-toggle="tooltip" data-placement="top"
+                            title="搭建属于自己的web推送服务">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+
+                <!-- UY BEGIN -->
+                <br>
+                <div id="uyan_frame"></div>
+                <!--<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2138668"></script>-->
+                <!-- UY END -->
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+
+<aside id="sidebar">
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">Contents</strong>
+    
+    <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E7%BD%91%E9%A1%B5%E6%88%AA%E5%9B%BE"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">网页截图</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E6%B5%8F%E8%A7%88%E5%99%A8%E6%93%8D%E6%8E%A7"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">浏览器操控</span></a></li></ol>
+    
+  </div>
+</aside>
+
+
+
+
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#headless"
+                            title="headless">headless</a>
+                        
+                        <a class="tag" href="/tags/#nodejs"
+                            title="nodejs">nodejs</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async (u, c) {
+        var d = document,
+            t = 'script',
+            o = d.createElement(t),
+            s = d.getElementsByTagName(t)[0];
+        o.src = u;
+        if (c) {
+            o.addEventListener('load', function (e) {
+                c(null, e);
+            }, false);
+        }
+        s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+    <!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center">
+          
+          
+          
+
+          
+          <li>
+            <a target="_blank" href="http://weibo.com/2539035205">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a target="_blank" href="https://github.com/Ryuurock">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a href="mailto:lwx_1993@outlook.com">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+        </ul>
+        <p class="copyright text-muted">
+          Wanxiang Long(Ryuurock) &copy; 1993-2022
+          <br>
+          <span id="busuanzi_container_site_uv">小站访客数<span id="busuanzi_value_site_uv"></span>人次</span>
+          |
+          <span id="busuanzi_container_site_pv">小站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/lx-blog.js"></script>
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- async load function -->
+<script>
+  function async (u, c) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) {
+      o.addEventListener('load', function (e) {
+        c(null, e);
+      }, false);
+    }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+  // only load tagcloud.js in tag.html
+  if ($('#tag_cloud').length !== 0) {
+    async ("/js/jquery.tagcloud.js", function () {
+      $.fn.tagcloud.defaults = {
+        //size: {start: 1, end: 1, unit: 'em'},
+        color: {
+          start: '#bbbbee',
+          end: '#0085a1'
+        },
+      };
+      $('#tag_cloud a').tagcloud();
+    })
+  }
+</script>
+
+<!--fastClick.js -->
+<script>
+  async ("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    var $nav = document.querySelector("nav");
+    if ($nav) FastClick.attach($nav);
+  })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+    <a id="rocket" href="#top" class="iconfont icon-23435"></a>
+    <script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+    <!-- Image to hack wechat -->
+    <!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+    <!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

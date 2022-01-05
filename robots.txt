@@ -1,0 +1,6 @@
+
+
+User-agent: *
+Allow: /
+
+Sitemap: https://ryuurock.github.io/sitemap.xml

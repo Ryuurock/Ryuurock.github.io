@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="baidu-site-verification" content="code-Hn2FTkozwu" />
+  <meta name="google-site-verification" content="VRegEMvasrnJoWUYvftfL9jaiIF1ovA-dZPb4juzyCA" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="keyword" content="Web前端|前端|javascript|css|html|html5">
+  <link rel="icon" href="/favicon.ico">
+  <!-- Place this tag in your head or just before your close body tag. -->
+  <title>
+    
+    不一样的Web Components——Shadow DOM - longwanxiang的博客 | Ryuurock | Web前端实习生
+    
+  </title>
+  <link rel="canonical" href="https://ryuurock.github.io/2018/10/21/new-web-components/">
+  <!-- Custom Fonts -->
+  <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+  <!-- Hux change font-awesome CDN to qiniu -->
+  <link href="//cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <!-- Bootstrap Core CSS -->
+  
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+  <!-- Custom CSS -->
+  
+<link rel="stylesheet" href="/css/beantech.min.css">
+
+  <!-- Pygments Highlight CSS -->
+  
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+<link rel="stylesheet" href="/css/widget.css">
+
+  
+<link rel="stylesheet" href="/css/rocket.css">
+
+  
+<link rel="stylesheet" href="/css/signature.css">
+
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  <link rel="stylesheet" type="text/css" href="//at.alicdn.com/t/font_qt49r5gb9r8b0529.css">
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+
+<body ontouchstart="">
+    <!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+  header.intro-header{
+    
+      background-image: url('/covers/post/IMG_2544.JPG')
+      /*post*/
+    
+  }
+  
+</style>
+
+<header class="intro-header" >
+  <!-- Signature -->
+  <div id="signature">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        
+          <div class="post-heading">
+            <div class="tags">
+                
+            </div>
+            <h1>不一样的Web Components——Shadow DOM</h1>
+            <h2 class="subheading"></h2>
+            <span class="meta">
+                Posted by Wanxiang Long(Ryuurock) on
+                2018-10-21
+            </span>
+          </div>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</header>
+
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header page-scroll">
+      <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Longwx Blog</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+    <div id="huxblog_navbar">
+      <div class="navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="/">Home</a></li>
+          <li><a href="/about/">About</a></li><li><a href="/archive/">Archives</a></li><li><a href="/tags/">Tags</a></li></ul>
+      </div>
+    </div>
+    <!-- /.navbar-collapse -->
+  </div>
+  <!-- /.container -->
+</nav>
+<script>
+  // Drop Bootstarp low-performance Navbar
+  // Use customize navbar with high-quality material design animation
+  // in high-perf jank-free CSS3 implementation
+  var $body = document.body;
+  var $toggle = document.querySelector('.navbar-toggle');
+  var $navbar = document.querySelector('#huxblog_navbar');
+  var $collapse = document.querySelector('.navbar-collapse');
+
+  $toggle.addEventListener('click', handleMagic)
+
+  function handleMagic(e) {
+    if ($navbar.className.indexOf('in') > 0) {
+      // CLOSE
+      $navbar.className = " ";
+      // wait until animation end.
+      setTimeout(function () {
+        // prevent frequently toggle
+        if ($navbar.className.indexOf('in') < 0) {
+          $collapse.style.height = "0px"
+        }
+      }, 400)
+    } else {
+      // OPEN
+      $collapse.style.height = "auto"
+      $navbar.className += " in";
+    }
+  }
+</script>
+
+
+    <!-- Modify by Yu-Hsuan Yen -->
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>在Reactjs、Vuejs和Angular大行其道的今天，大家所熟知的web组件更多的是由框架本身定义的一套组件规范，如Reactjs的组件是一个js或者jsx文件，里面可以直接写类似于html标签的代码。Vuejs推崇的“关注点分离”自己创造了一种文件格式<code>.vue</code>作为组件，里面可以直接写web的“三剑客”：html、js和css。而angular（2.x以上）则不同于前面两者，官方示例则更建议以文件夹来创建组件，文件夹内分别存放html、css和js。但是不管怎样这些技术都并非来自浏览器原生或web标准。今天我们要说的是另外一种组件规范：<strong>Shadow DOM</strong>和<strong>Custom Element</strong><br>
+其实Shadow DOM和Custom Element是web components的两个个子集，它还包括</p>
+<ul>
+<li>Custom Elements(v0/v1) --用于声明自定义标签</li>
+<li>Shadow DOM(v0/v1) --解决一个文档中可能需要大量交互的多个DOM树，并建立和维护各自功独立作用域</li>
+<li>HTML templates --Method of declaring a portion of reusable markup that is parsed but not rendered until cloned.</li>
+<li>HTML Imports --Method of including and reusing HTML documents in other HTML documents.</li>
+</ul>
+<p>一般前两个一起配合使用，后两个一起配合使用，他们都来自W3C标准，并由浏览器原生实现。本文主要简单介绍Custom Elements+Shadow DOM去创建一个自定义的组件</p>
+<p>首先看看Custom Elements的支持情况<br>
+<img src="WX20181021-211111@2x.png" alt=""><br>
+然后是Shadow DOM的<br>
+<img src="WX20181021-212656@2x.png" alt=""></p>
+<blockquote>
+<p>注：这里我们直接排除V0，因为V0即将被废弃</p>
+</blockquote>
+<p>可以看到目前的支持率不太理想，但是Firefox已经在最近发布一个版本中支持，chrome也早已支持。Safari目前只支持 autonomous custom elements（自主自定义标签），而 Edge也正在积极实现中。</p>
+<p>我们先看看使用方法：<br>
+通过<a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/API/CustomElementRegistry">CustomElementRegistry</a> 对象来处理web文档中的custom elements — 该对象允许你注册一个 custom element，返回已注册 custom elements的信息，等等。<br>
+可以通过 <a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/API/CustomElementRegistry/define">CustomElementRegistry.define()</a>方法来注册一个custom element，该方法接受以下参数：</p>
+<ul>
+<li>一个 DOMString，用于表示所创建的元素的名称。注意，custom element 的名称中必须要有短横线。</li>
+<li>一个类对象，用于定义元素的行为。该类需要继承自<a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLParagraphElement">HTMLParagraphElement</a></li>
+<li>一个包含 extends属性的配置对象，是可选参数。它指定了所创建的元素继承自哪个内置元素，可以继承任何内置元素。</li>
+</ul>
+<blockquote>
+<p>⚠️注意，当我们指定第三个参数的<code>extends</code>属性后，将控制custom组件的使用方式</p>
+</blockquote>
+<ul>
+<li>Autonomous custom elements 是独立的元素，它不继承其他内建的HTML元素。你可以直接把它们写成HTML标签的形式，来在页面上使用。例如 <popup-info>，或者是<code>document.createElement(&quot;popup-info&quot;)</code>这样。</li>
+<li>Customized built-in elements 继承自基本的HTML元素。在创建时，你必须指定所需扩展的元素（正如上面例子所示），使用时，需要先写出基本的元素标签，并通过 is 属性指定custom element的名称。例如<code>&lt;p is=&quot;word-count&quot; /&gt;</code>, 或者 <code>document.createElement(&quot;p&quot;, &#123; is: &quot;word-count&quot; &#125;)</code>。</li>
+</ul>
+<p>我们来实际操作一下，创建一个可交互的组件</p>
+<p>js部分</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">createElementWithAttr</span>(<span class="params">tagName, attrs = &#123;&#125;</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> dom = <span class="built_in">document</span>.createElement(tagName);</span><br><span class="line">  <span class="built_in">Object</span>.keys(attrs).forEach(<span class="function">(<span class="params">key</span>) =&gt;</span> dom.setAttribute(key, attrs[key]));</span><br><span class="line">  <span class="keyword">return</span> dom;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CustomComp</span> <span class="keyword">extends</span> <span class="title">HTMLElement</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="title">constructor</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">    <span class="built_in">super</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建 shadow root</span></span><br><span class="line">    <span class="keyword">const</span> shadow = <span class="built_in">this</span>.attachShadow(&#123;<span class="attr">mode</span>: <span class="string">&#x27;open&#x27;</span>&#125;);</span><br><span class="line">    <span class="keyword">const</span> wrapper = createElementWithAttr(<span class="string">&#x27;div&#x27;</span>, &#123;</span><br><span class="line">      <span class="attr">class</span>: <span class="string">&#x27;wrapper&#x27;</span></span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> p = createElementWithAttr(<span class="string">&#x27;p&#x27;</span>);</span><br><span class="line">    p.innerText = <span class="built_in">this</span>.getAttribute(<span class="string">&#x27;content&#x27;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> button = createElementWithAttr(<span class="string">&#x27;button&#x27;</span>, &#123;</span><br><span class="line">      <span class="attr">type</span>: <span class="string">&#x27;button&#x27;</span>,</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    button.onclick = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">      p.classList.toggle(<span class="string">&#x27;none&#x27;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    button.innerText = <span class="string">&#x27;点我触发显示隐藏内容&#x27;</span>;</span><br><span class="line"></span><br><span class="line">    wrapper.appendChild(button)</span><br><span class="line">    wrapper.appendChild(p)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> style = <span class="built_in">document</span>.createElement(<span class="string">&#x27;style&#x27;</span>);</span><br><span class="line">    style.innerText = <span class="string">`</span></span><br><span class="line"><span class="string">      .none &#123;</span></span><br><span class="line"><span class="string">        display: none;</span></span><br><span class="line"><span class="string">      &#125;</span></span><br><span class="line"><span class="string">    `</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    shadow.appendChild(wrapper);</span><br><span class="line">    shadow.appendChild(style);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 在 custom element首次被插入到文档DOM节点上时被调用</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="function"><span class="title">connectedCallback</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">&#x27;mounted&#x27;</span>)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 在 custom element增加、删除或者修改某个属性时被调用。</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="function"><span class="title">attributeChangedCallback</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 当 custom element从文档DOM中删除时，被调用</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="function"><span class="title">disconnectedCallback</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 当 custom element被移动到新的文档时，被调用</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="function"><span class="title">adoptedCallback</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">customElements.define(</span><br><span class="line">  <span class="string">&#x27;word-count&#x27;</span>, <span class="comment">// 自定义元素名.</span></span><br><span class="line">  CustomComp, <span class="comment">// 自定义元素构造器.</span></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 控制元素如何定义. 目前有一个选项支持:</span></span><br><span class="line"><span class="comment">   *  extends. 指定继承的已创建的元素. 被用于创建自定义元素.如</span></span><br><span class="line"><span class="comment">   *   &lt;p is=&quot;word-count&quot;&gt;&lt;/p&gt;</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="comment">// &#123; extends: &#x27;p&#x27; &#125;</span></span><br><span class="line">)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>html部分</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">word-count</span> <span class="attr">content</span>=<span class="string">&quot;我是内容&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">word-count</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span> <span class="attr">class</span>=<span class="string">&quot;none&quot;</span>&gt;</span>同级内容1<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>然后我们来看一下浏览器呈现的效果<br>
+<img src="WX20181021-193954@2x.png" alt=""><br>
+此时我们可以看到此时<code>word-count</code>标签下面有一块特殊的地方叫shadow-root，这个其实和其他dom树是一样的，只是它创建了一个相对独立的空间，它的环境与外部是隔离的，比如样式不会影响最顶层的dom。<br>
+如果你用的是较版本新的chrome，可以打开开发者工具看和上图一样的效果<code>.none</code>样式仅仅影响了这个custom组件本身，并不会对最外层一样有<code>none</code>这个class的元素造成“污染”</p>
+<hr>
+<p><custom-comp content="测试内容"></custom-comp></p>
+<p class="none">同级内容</p>
+<script>
+  function createElementWithAttr(tagName, attrs = {}) {
+    const dom = document.createElement(tagName);
+    Object.keys(attrs).forEach((key) => dom.setAttribute(key, attrs[key]));
+    return dom;
+  }
+  class CustomComp extends HTMLElement {
+    constructor() {
+      super();
+      // 创建 shadow root
+      const shadow = this.attachShadow({mode: 'open'});
+      const wrapper = createElementWithAttr('div', {
+        class: 'wrapper'
+      });
+      const p = createElementWithAttr('p');
+      p.innerText = this.getAttribute('content');
+      const button = createElementWithAttr('button', {
+        type: 'button',
+      });
+      button.onclick = () => {
+        p.classList.toggle('none')
+      }
+      button.innerText = '点我触发显示隐藏内容';
+      wrapper.appendChild(button)
+      wrapper.appendChild(p)
+      const style = document.createElement('style');
+      style.innerText = `
+        .none {
+          display: none;
+        }
+      `;
+      shadow.appendChild(wrapper);
+      shadow.appendChild(style);
+    }
+  }
+  customElements.define('custom-comp', CustomComp)
+</script>
+<hr>
+<p>上面的“测试内容”在隐藏时，“同级内容”虽然也有<code>.none</code>样式，但是完全不受影响，因为<code>display: none</code>只作用了这个自定义组件内的元素<br>
+实际上，我们每天使用的chrome已经用Shadow DOM实现了很多组件了，如video、input、select、audio等等原生组件，当然默认chrome对此是关闭的，需要手动打开shadow Dom的显示</p>
+<p><img src="WX20181021-202408@2x.png" alt="图片"><br>
+<img src="WX20181021-212046@2x.png" alt="图片"><br>
+图片取自掘金 @创宇前端<br>
+然后我再选中video标签</p>
+<p><img src="WX20181021-202721@2x.png" alt="图片"></p>
+<p>所以目前自定义原生组件更多用于浏览器本身的组件实现，以及针对特定的浏览器做开发（如chrome），除了浏览器兼容性以外，更多的是还是没有解决开发中的痛点，比如复杂的dom结构可能更依赖于直接使用innerHtml或者第三方的库来实现。</p>
+<p>当然以上只是Web Components的一点点东西，随着web标准的发展和完善可能会有更多的新特性出现，目前Shadow DOM和 Custom Elements已经到了V1的阶段，v0 规范将会在 Chrome 70 中被标记弃用警告，并在 2019 年 3 月左右从 Chrome 73 中删除。通过浏览器自身可以理解的方式去构建组件，我想这可能将在未来成为前端标准。</p>
+
+
+                <hr>
+                <!-- Pager -->
+                <ul class="pager clearfix">
+                    
+                    <li class="previous">
+                        <a href="/2018/11/25/frontend-interview/" data-toggle="tooltip" data-placement="top"
+                            title="一篇前端面试题的作业">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2018/06/09/nginx-use/" data-toggle="tooltip" data-placement="top"
+                            title="记一次博客从http到https的迁移（nginx的使用）">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+
+                <!-- UY BEGIN -->
+                <br>
+                <div id="uyan_frame"></div>
+                <!--<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2138668"></script>-->
+                <!-- UY END -->
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+
+<aside id="sidebar">
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">Contents</strong>
+    
+    <ol class="nav">none</ol>
+    
+  </div>
+</aside>
+
+
+
+
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async (u, c) {
+        var d = document,
+            t = 'script',
+            o = d.createElement(t),
+            s = d.getElementsByTagName(t)[0];
+        o.src = u;
+        if (c) {
+            o.addEventListener('load', function (e) {
+                c(null, e);
+            }, false);
+        }
+        s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+    <!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center">
+          
+          
+          
+
+          
+          <li>
+            <a target="_blank" href="http://weibo.com/2539035205">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a target="_blank" href="https://github.com/Ryuurock">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a href="mailto:lwx_1993@outlook.com">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+        </ul>
+        <p class="copyright text-muted">
+          Wanxiang Long(Ryuurock) &copy; 1993-2022
+          <br>
+          <span id="busuanzi_container_site_uv">小站访客数<span id="busuanzi_value_site_uv"></span>人次</span>
+          |
+          <span id="busuanzi_container_site_pv">小站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/lx-blog.js"></script>
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- async load function -->
+<script>
+  function async (u, c) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) {
+      o.addEventListener('load', function (e) {
+        c(null, e);
+      }, false);
+    }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+  // only load tagcloud.js in tag.html
+  if ($('#tag_cloud').length !== 0) {
+    async ("/js/jquery.tagcloud.js", function () {
+      $.fn.tagcloud.defaults = {
+        //size: {start: 1, end: 1, unit: 'em'},
+        color: {
+          start: '#bbbbee',
+          end: '#0085a1'
+        },
+      };
+      $('#tag_cloud a').tagcloud();
+    })
+  }
+</script>
+
+<!--fastClick.js -->
+<script>
+  async ("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    var $nav = document.querySelector("nav");
+    if ($nav) FastClick.attach($nav);
+  })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+    <a id="rocket" href="#top" class="iconfont icon-23435"></a>
+    <script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+    <!-- Image to hack wechat -->
+    <!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+    <!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

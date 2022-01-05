@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="baidu-site-verification" content="code-Hn2FTkozwu" />
+  <meta name="google-site-verification" content="VRegEMvasrnJoWUYvftfL9jaiIF1ovA-dZPb4juzyCA" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="keyword" content="Web前端|前端|javascript|css|html|html5">
+  <link rel="icon" href="/favicon.ico">
+  <!-- Place this tag in your head or just before your close body tag. -->
+  <title>
+    
+    scratch 应用体积优化之——微前端化 scratch extensions - longwanxiang的博客 | Ryuurock | Web前端实习生
+    
+  </title>
+  <link rel="canonical" href="https://ryuurock.github.io/2021/12/01/micro-front-scratch-extensions/">
+  <!-- Custom Fonts -->
+  <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+  <!-- Hux change font-awesome CDN to qiniu -->
+  <link href="//cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <!-- Bootstrap Core CSS -->
+  
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+  <!-- Custom CSS -->
+  
+<link rel="stylesheet" href="/css/beantech.min.css">
+
+  <!-- Pygments Highlight CSS -->
+  
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+<link rel="stylesheet" href="/css/widget.css">
+
+  
+<link rel="stylesheet" href="/css/rocket.css">
+
+  
+<link rel="stylesheet" href="/css/signature.css">
+
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  <link rel="stylesheet" type="text/css" href="//at.alicdn.com/t/font_qt49r5gb9r8b0529.css">
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+
+<body ontouchstart="">
+    <!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+  header.intro-header{
+    
+      background-image: url('/covers/post/IMG_2544.JPG')
+      /*post*/
+    
+  }
+  
+</style>
+
+<header class="intro-header" >
+  <!-- Signature -->
+  <div id="signature">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        
+          <div class="post-heading">
+            <div class="tags">
+                
+                  <a class="tag" href="/tags/#scratch" title="scratch">scratch</a>
+                
+                  <a class="tag" href="/tags/#微前端" title="微前端">微前端</a>
+                
+            </div>
+            <h1>scratch 应用体积优化之——微前端化 scratch extensions</h1>
+            <h2 class="subheading"></h2>
+            <span class="meta">
+                Posted by Wanxiang Long(Ryuurock) on
+                2021-12-01
+            </span>
+          </div>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</header>
+
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header page-scroll">
+      <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Longwx Blog</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+    <div id="huxblog_navbar">
+      <div class="navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="/">Home</a></li>
+          <li><a href="/about/">About</a></li><li><a href="/archive/">Archives</a></li><li><a href="/tags/">Tags</a></li></ul>
+      </div>
+    </div>
+    <!-- /.navbar-collapse -->
+  </div>
+  <!-- /.container -->
+</nav>
+<script>
+  // Drop Bootstarp low-performance Navbar
+  // Use customize navbar with high-quality material design animation
+  // in high-perf jank-free CSS3 implementation
+  var $body = document.body;
+  var $toggle = document.querySelector('.navbar-toggle');
+  var $navbar = document.querySelector('#huxblog_navbar');
+  var $collapse = document.querySelector('.navbar-collapse');
+
+  $toggle.addEventListener('click', handleMagic)
+
+  function handleMagic(e) {
+    if ($navbar.className.indexOf('in') > 0) {
+      // CLOSE
+      $navbar.className = " ";
+      // wait until animation end.
+      setTimeout(function () {
+        // prevent frequently toggle
+        if ($navbar.className.indexOf('in') < 0) {
+          $collapse.style.height = "0px"
+        }
+      }, 400)
+    } else {
+      // OPEN
+      $collapse.style.height = "auto"
+      $navbar.className += " in";
+    }
+  }
+</script>
+
+
+    <!-- Modify by Yu-Hsuan Yen -->
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h2 id="前言"><a class="anchorjs-link" href="#前言"></a>前言</h2>
+<p><code>微前端</code> 的实现好像也用不到什么突然出现的新技术，或者有什么高深莫测的概念，可近两年它就火了。早在 2016 年被 Thought Works 提出后，也好像没有掀起什么波澜，直到 19 年 20 年，<code>qiankun</code> 等一众微前端的框架出现后这个词才渐渐热起来。在这个概念提出前，也有 <code>iframe</code> 这样的解决方案达到了类似的效果，只是它不够标准化，也没有一个高大上的名字，我们只管叫它<em>应用嵌套</em>或者就叫<em>嵌套一个页面</em>（论起名字的重要性）。</p>
+<h2 id="背景"><a class="anchorjs-link" href="#背景"></a>背景</h2>
+<p>前东家的老板在“双减”出现前，开始做领域内（少儿编程）的转型，由卖课转向做“少儿编程社区”。我作为公司内的 scratch 砖家在第一个版本上线后自然而然地开始做 scratch 在各个页面和端上的性能优化，希望它在无缓存状态能够加载得更快。</p>
+<h2 id="行动"><a class="anchorjs-link" href="#行动"></a>行动</h2>
+<h3 id="寻找一击即中的优化方向"><a class="anchorjs-link" href="#寻找一击即中的优化方向"></a>寻找一击即中的优化方向</h3>
+<p>已上线的版本早在课程系统重构的时候就已经做了一版 scratch 瘦身了，无非就是使用 <code>webpack-bundle-analyzer</code> 跑一圈看看哪里有大体积文件，有重复的 npm 包，然后对症下药解决问题。由于没有足够的时间，看到 <a target="_blank" rel="noopener" href="https://github.com/LLK/scratch-vm/tree/develop/src/extensions">scratch-vm/src/extensions</a> 下的一堆扩展我是比较无奈的，尤其是 music 下面一堆 .mp3 文件，为了保证原汁原味的scratch，它自带的能力我们一般是不会去做移除的。scratch 的扩展打个比方就好像一个 npm 源，里面有无数的第三方包，但是你不可能一个项目需要把所有包全部装上把。scratch 的现状就是这样的——不管你用不用，我都给你怼上了，随着我们加更多扩展，js 就会越来越大。</p>
+<blockquote>
+<p>尝试过 dynamic import 方案，作为个包来说，不能做到开箱即用。如果转译后发布，则需要拷贝 chunks。如果跳过 dynamic import 语法发布，需要在主应用里添加转译路径</p>
+</blockquote>
+<p>和产品聊了后续的规划后，得知“丰富的扩展”也是我们后续要主打的一个特色，所以这个优化点能给当下和未来的带来非常直接的收益。</p>
+<h3 id="实施"><a class="anchorjs-link" href="#实施"></a>实施</h3>
+<h4 id="创建新的项目"><a class="anchorjs-link" href="#创建新的项目"></a>创建新的项目</h4>
+<p>不管是 monorepo 还是独立的仓库，我们都需要单独创建一个项目，带来的最大好处就是<code>独立部署</code>。</p>
+<h4 id="定义数据解构"><a class="anchorjs-link" href="#定义数据解构"></a>定义数据解构</h4>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">interface</span> ExtensionMap &#123;</span><br><span class="line">  [extensionId: <span class="built_in">string</span>]: &#123;</span><br><span class="line">    <span class="comment">// 将扩展的实现作为异步内容</span></span><br><span class="line">    <span class="attr">Extension</span>: <span class="function">() =&gt;</span> <span class="keyword">import</span>();</span><br><span class="line">    <span class="comment">// 扩展的名称等作为同步内容</span></span><br><span class="line">    info: &#123;</span><br><span class="line">      <span class="attr">name</span>: <span class="built_in">string</span>;</span><br><span class="line">      extensionId: <span class="built_in">string</span>;</span><br><span class="line">      iconURL: <span class="built_in">string</span>;</span><br><span class="line">      insetIconURL: <span class="built_in">string</span>;</span><br><span class="line">      description: <span class="built_in">string</span>;</span><br><span class="line">      disabled: <span class="built_in">boolean</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们以最大的内置扩展<code>music</code>为例进行迁移，得到这样的一个对象</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">  <span class="attr">music</span>: &#123;</span><br><span class="line">    <span class="attr">Extension</span>: <span class="function">() =&gt;</span> <span class="keyword">import</span>(<span class="string">&#x27;./extensions/music&#x27;</span>),</span><br><span class="line">    <span class="attr">info</span>: &#123;</span><br><span class="line">      <span class="attr">name</span>: <span class="string">&#x27;音乐&#x27;</span>,</span><br><span class="line">      <span class="attr">extensionId</span>: <span class="string">&#x27;music&#x27;</span>,</span><br><span class="line">      <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125; <span class="keyword">as</span> ExtensionMap</span><br></pre></td></tr></table></figure>
+<h4 id="编写-webpack-配置"><a class="anchorjs-link" href="#编写-webpack-配置"></a>编写 webpack 配置</h4>
+<p>首先你需要固定 webpack 产出的主文件的名字，如果不这么做的话，将导致入口变成动态的。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> webpackConfig = &#123;</span><br><span class="line">  <span class="attr">entry</span>: &#123;</span><br><span class="line">    <span class="attr">main</span>: <span class="string">&#x27;./src/index.js&#x27;</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">output</span>: &#123;</span><br><span class="line">    <span class="attr">filename</span>: <span class="function">(<span class="params">&#123; contentHashType, chunk &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="string">`static/js/<span class="subst">$&#123;contentHashType === <span class="string">&#x27;javascript&#x27;</span> &amp;&amp; chunk.name === <span class="string">&#x27;main&#x27;</span> ? <span class="string">&#x27;[name].js&#x27;</span> : <span class="string">&#x27;[name].[contenthash:8].js&#x27;</span>&#125;</span>`</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们只需要固定入口文件的名字，产生的其他 chunks 依然让他带上 hash，这样可以利用缓存。</p>
+<h4 id="部署"><a class="anchorjs-link" href="#部署"></a>部署</h4>
+<p>将 webpack 的构建产物部署到服务器，让我们能够访问到主文件如 <code>https://yousite.com/scratch-extension/main.js</code><br>
+如果不是协商缓存的策略那么路径应该是</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">`https://yousite.com/scratch-extension/main.js?v=<span class="subst">$&#123;<span class="built_in">Date</span>.now()&#125;</span>`</span></span><br></pre></td></tr></table></figure>
+<h4 id="修改-scratch-的扩展加载逻辑"><a class="anchorjs-link" href="#修改-scratch-的扩展加载逻辑"></a>修改 scratch 的扩展加载逻辑</h4>
+<p>首先我们找到 <a target="_blank" rel="noopener" href="https://github.com/LLK/scratch-vm/blob/980e65c01d8e828671d621446a172922a9eec15e/src/extension-support/extension-manager.js?_pjax=%23js-repo-pjax-container%2C%20div%5Bitemtype%3D%22http%3A%2F%2Fschema.org%2FSoftwareSourceCode%22%5D%20main%2C%20%5Bdata-pjax-container%5D#L142-L165">scratch 的扩展加载逻辑</a></p>
+<p>简单解释下这里的流程</p>
+<ol>
+<li>尝试从内置扩展列表中查找扩展并加载</li>
+<li>扩展在内置列表不存在则从网络直接加载</li>
+</ol>
+<p>然后我们在<code>扩展在内置列表不存在</code>这条逻辑后面插入一段从我们组件服务，下面是伪代码</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="params">resolve</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> script = <span class="built_in">document</span>.createElement(<span class="string">&#x27;script&#x27;</span>);</span><br><span class="line">  script.async = <span class="literal">true</span>;</span><br><span class="line">  script.src = <span class="string">`https://yousite.com/scratch-extension/main.js?v=<span class="subst">$&#123;<span class="built_in">Date</span>.now()&#125;</span>`</span></span><br><span class="line">  script.onload = resolve</span><br><span class="line">&#125;)</span><br><span class="line">  .then(<span class="function">(<span class="params">&#123; <span class="keyword">default</span>: remoteExtensions &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123; Extension &#125; = remoteExtensions[extensionURL]</span><br><span class="line">    <span class="comment">// continue</span></span><br><span class="line">  &#125;)</span><br></pre></td></tr></table></figure>
+<h2 id="收益"><a class="anchorjs-link" href="#收益"></a>收益</h2>
+<ul>
+<li>扩展作为一个单独的服务，独立开发，独立部署，构建即生效，减少发布到私有源再更新其他项目的的成本</li>
+<li>扩展的 js 代码真正做到按需加载，新的扩展几乎不影响 main.js 和 scratch 本身的大小。</li>
+<li>减少主应用的构建工具在这里花费的时间</li>
+</ul>
+<h2 id="复盘"><a class="anchorjs-link" href="#复盘"></a>复盘</h2>
+<p>将扩展服务的入口文件 hard coding 到代码里始终不太优雅，如果有必要，我们可以将 scratch-extensions 作为 package 发布，然后在代码里 import，然后通过 webpack 的 external 能力，在主应用上配置scratch-extensions 的外部链接来将它提取出去。甚至我们可以配合 webpack5 的 <a target="_blank" rel="noopener" href="https://webpack.docschina.org/concepts/module-federation/#containerplugin-low-level">Module Federation（模块联邦）</a>达到一样的效果</p>
+
+
+                <hr>
+                <!-- Pager -->
+                <ul class="pager clearfix">
+                    
+                    <li class="previous">
+                        <a href="/2021/12/27/web-load-performance-optimization/" data-toggle="tooltip" data-placement="top"
+                            title="再谈 web 加载性能优化——字体裁剪">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2021/03/14/scratch/" data-toggle="tooltip" data-placement="top"
+                            title="Scratch 漫谈">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+
+                <!-- UY BEGIN -->
+                <br>
+                <div id="uyan_frame"></div>
+                <!--<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2138668"></script>-->
+                <!-- UY END -->
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+
+<aside id="sidebar">
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">Contents</strong>
+    
+    <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">前言</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">背景</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E8%A1%8C%E5%8A%A8"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">行动</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%AF%BB%E6%89%BE%E4%B8%80%E5%87%BB%E5%8D%B3%E4%B8%AD%E7%9A%84%E4%BC%98%E5%8C%96%E6%96%B9%E5%90%91"><span class="toc-nav-number">3.1.</span> <span class="toc-nav-text">寻找一击即中的优化方向</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%AE%9E%E6%96%BD"><span class="toc-nav-number">3.2.</span> <span class="toc-nav-text">实施</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%88%9B%E5%BB%BA%E6%96%B0%E7%9A%84%E9%A1%B9%E7%9B%AE"><span class="toc-nav-number">3.2.1.</span> <span class="toc-nav-text">创建新的项目</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E8%A7%A3%E6%9E%84"><span class="toc-nav-number">3.2.2.</span> <span class="toc-nav-text">定义数据解构</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E7%BC%96%E5%86%99-webpack-%E9%85%8D%E7%BD%AE"><span class="toc-nav-number">3.2.3.</span> <span class="toc-nav-text">编写 webpack 配置</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E9%83%A8%E7%BD%B2"><span class="toc-nav-number">3.2.4.</span> <span class="toc-nav-text">部署</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E4%BF%AE%E6%94%B9-scratch-%E7%9A%84%E6%89%A9%E5%B1%95%E5%8A%A0%E8%BD%BD%E9%80%BB%E8%BE%91"><span class="toc-nav-number">3.2.5.</span> <span class="toc-nav-text">修改 scratch 的扩展加载逻辑</span></a></li></ol></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%94%B6%E7%9B%8A"><span class="toc-nav-number">4.</span> <span class="toc-nav-text">收益</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%A4%8D%E7%9B%98"><span class="toc-nav-number">5.</span> <span class="toc-nav-text">复盘</span></a></li></ol>
+    
+  </div>
+</aside>
+
+
+
+
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#scratch"
+                            title="scratch">scratch</a>
+                        
+                        <a class="tag" href="/tags/#微前端"
+                            title="微前端">微前端</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async (u, c) {
+        var d = document,
+            t = 'script',
+            o = d.createElement(t),
+            s = d.getElementsByTagName(t)[0];
+        o.src = u;
+        if (c) {
+            o.addEventListener('load', function (e) {
+                c(null, e);
+            }, false);
+        }
+        s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+    <!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center">
+          
+          
+          
+
+          
+          <li>
+            <a target="_blank" href="http://weibo.com/2539035205">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a target="_blank" href="https://github.com/Ryuurock">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a href="mailto:lwx_1993@outlook.com">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+        </ul>
+        <p class="copyright text-muted">
+          Wanxiang Long(Ryuurock) &copy; 1993-2022
+          <br>
+          <span id="busuanzi_container_site_uv">小站访客数<span id="busuanzi_value_site_uv"></span>人次</span>
+          |
+          <span id="busuanzi_container_site_pv">小站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/lx-blog.js"></script>
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- async load function -->
+<script>
+  function async (u, c) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) {
+      o.addEventListener('load', function (e) {
+        c(null, e);
+      }, false);
+    }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+  // only load tagcloud.js in tag.html
+  if ($('#tag_cloud').length !== 0) {
+    async ("/js/jquery.tagcloud.js", function () {
+      $.fn.tagcloud.defaults = {
+        //size: {start: 1, end: 1, unit: 'em'},
+        color: {
+          start: '#bbbbee',
+          end: '#0085a1'
+        },
+      };
+      $('#tag_cloud a').tagcloud();
+    })
+  }
+</script>
+
+<!--fastClick.js -->
+<script>
+  async ("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    var $nav = document.querySelector("nav");
+    if ($nav) FastClick.attach($nav);
+  })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+    <a id="rocket" href="#top" class="iconfont icon-23435"></a>
+    <script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+    <!-- Image to hack wechat -->
+    <!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+    <!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

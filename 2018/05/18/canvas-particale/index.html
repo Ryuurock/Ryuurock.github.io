@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="baidu-site-verification" content="code-Hn2FTkozwu" />
+  <meta name="google-site-verification" content="VRegEMvasrnJoWUYvftfL9jaiIF1ovA-dZPb4juzyCA" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="keyword" content="Web前端|前端|javascript|css|html|html5">
+  <link rel="icon" href="/favicon.ico">
+  <!-- Place this tag in your head or just before your close body tag. -->
+  <title>
+    
+    canvas粒子效果初探 - longwanxiang的博客 | Ryuurock | Web前端实习生
+    
+  </title>
+  <link rel="canonical" href="https://ryuurock.github.io/2018/05/18/canvas-particale/">
+  <!-- Custom Fonts -->
+  <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+  <!-- Hux change font-awesome CDN to qiniu -->
+  <link href="//cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <!-- Bootstrap Core CSS -->
+  
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+  <!-- Custom CSS -->
+  
+<link rel="stylesheet" href="/css/beantech.min.css">
+
+  <!-- Pygments Highlight CSS -->
+  
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+<link rel="stylesheet" href="/css/widget.css">
+
+  
+<link rel="stylesheet" href="/css/rocket.css">
+
+  
+<link rel="stylesheet" href="/css/signature.css">
+
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  <link rel="stylesheet" type="text/css" href="//at.alicdn.com/t/font_qt49r5gb9r8b0529.css">
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+
+<body ontouchstart="">
+    <!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+  header.intro-header{
+    
+      background-image: url('/covers/post/IMG_3951.JPG')
+      /*post*/
+    
+  }
+  
+</style>
+
+<header class="intro-header" >
+  <!-- Signature -->
+  <div id="signature">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        
+          <div class="post-heading">
+            <div class="tags">
+                
+                  <a class="tag" href="/tags/#canvas" title="canvas">canvas</a>
+                
+            </div>
+            <h1>canvas粒子效果初探</h1>
+            <h2 class="subheading">我是谁我在哪儿</h2>
+            <span class="meta">
+                Posted by Wanxiang Long(Ryuurock) on
+                2018-05-18
+            </span>
+          </div>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</header>
+
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header page-scroll">
+      <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Longwx Blog</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+    <div id="huxblog_navbar">
+      <div class="navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="/">Home</a></li>
+          <li><a href="/about/">About</a></li><li><a href="/archive/">Archives</a></li><li><a href="/tags/">Tags</a></li></ul>
+      </div>
+    </div>
+    <!-- /.navbar-collapse -->
+  </div>
+  <!-- /.container -->
+</nav>
+<script>
+  // Drop Bootstarp low-performance Navbar
+  // Use customize navbar with high-quality material design animation
+  // in high-perf jank-free CSS3 implementation
+  var $body = document.body;
+  var $toggle = document.querySelector('.navbar-toggle');
+  var $navbar = document.querySelector('#huxblog_navbar');
+  var $collapse = document.querySelector('.navbar-collapse');
+
+  $toggle.addEventListener('click', handleMagic)
+
+  function handleMagic(e) {
+    if ($navbar.className.indexOf('in') > 0) {
+      // CLOSE
+      $navbar.className = " ";
+      // wait until animation end.
+      setTimeout(function () {
+        // prevent frequently toggle
+        if ($navbar.className.indexOf('in') < 0) {
+          $collapse.style.height = "0px"
+        }
+      }, 400)
+    } else {
+      // OPEN
+      $collapse.style.height = "auto"
+      $navbar.className += " in";
+    }
+  }
+</script>
+
+
+    <!-- Modify by Yu-Hsuan Yen -->
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>在这之前对<code>canvas</code>这个标签还一直停留在</p>
+<ul>
+<li>效果炫酷</li>
+<li>api复杂难懂</li>
+</ul>
+<p>好吧，直到今天我也是这么觉得，但是好在已经有很多详细的文档和例子来帮我们理解这些api。<br>
+今天我们要做的canvas粒子效果如下图所示<br>
+<video src="video.mp4" controls></video></p>
+<p><strong>踩坑：</strong><br>
+canvas这个标签，设置宽高的时候是要使用标签的<code>width</code>和<code>height</code>属性来设置的，不能通过<code>style</code>的宽高来设置，否则会造成绘制出来的图形很模糊并且位置产生偏移</p>
+<p>废话不多说，本次的粒子动画用到的canvas的api有</p>
+<ul>
+<li>
+<p>clearRect(x, y, width, height) 清除画布上一个方形的区域，参数一看就懂系列</p>
+</li>
+<li>
+<p>drawImage(Image: image, x, y, height, width) 在画布上绘制一张图片，第一个参数是一个image对象，可以使用Image构造函数来生成</p>
+</li>
+<li>
+<p>arc(x, y, r, sAngle, eAngle, counterclockwise)</p>
+<p>圆的中心的 x 坐标。<br>
+y	圆的中心的 y 坐标。<br>
+r	圆的半径。<br>
+sAngle	起始角，以弧度计。（弧的圆形的三点钟位置是 0 度）。<br>
+eAngle	结束角，以弧度计。<br>
+counterclockwise	可选。规定应该逆时针还是顺时针绘图。False = 顺时针，true = 逆时针。</p>
+</li>
+<li>
+<p>getImageData(0, 0, width, height) 获取画布上一块区域的图片信息</p>
+</li>
+</ul>
+<p><code>getImageData</code>返回的对象里面包含了一个data属性，data属性是一个数组，返回了该区域内的所有像素点信息，以i~i+3为一组描述一个像素的rgba，例如</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> context = <span class="built_in">document</span>.getElementById(<span class="string">&#x27;canvas&#x27;</span>).getContext(<span class="string">&#x27;2d&#x27;</span>);</span><br><span class="line"><span class="keyword">const</span> data = context.getImageData(<span class="number">0</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">1</span>).data;</span><br><span class="line"><span class="keyword">const</span> red = data[<span class="number">0</span>],</span><br><span class="line">  green = data[<span class="number">1</span>],</span><br><span class="line">  blue = data[<span class="number">2</span>],</span><br><span class="line">  alpha = data[<span class="number">3</span>];</span><br></pre></td></tr></table></figure>
+<p>我们获取了1*1个像素点的信息，返回一个长度为4的数组，四个颜色分别对应红、黄、蓝和透明度，都是0~255的范围，不过这里的alpha通道和css有点不一样，css的alpha通道是0~1。</p>
+<p>总结一下整个思路</p>
+<ol>
+<li>绘制一张图到画布上</li>
+<li>获取像素点（对返回的像素点进行固定间隔的跳跃式获取，即可得到一组马赛克式的像素数据），并相对于整个画布随机出每个像素点的初始位置分散时随机位置。</li>
+<li>分散像素点（不断更新所有点的位置）</li>
+</ol>
+<p>第一步我们就先画一张图在canvas上吧</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">canvas</span> <span class="attr">id</span>=<span class="string">&quot;canvas1&quot;</span> <span class="attr">style</span>=<span class="string">&quot;margin: 0 auto;&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">canvas</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> canvas = <span class="built_in">document</span>.getElementById(<span class="string">&#x27;canvas1&#x27;</span>)</span><br><span class="line"><span class="keyword">const</span> width = <span class="number">300</span>,</span><br><span class="line">  height = width * <span class="number">.75</span></span><br><span class="line"><span class="keyword">const</span> imgHeight = height * <span class="number">0.6</span>,</span><br><span class="line">  imgWidth = imgHeight;</span><br><span class="line"></span><br><span class="line">canvas.width = width</span><br><span class="line">canvas.height = height</span><br><span class="line"><span class="keyword">const</span> context = canvas.getContext(<span class="string">&#x27;2d&#x27;</span>);</span><br><span class="line"><span class="keyword">const</span> image = <span class="keyword">new</span> Image();</span><br><span class="line">image.src = <span class="string">&#x27;avatar.png&#x27;</span>;</span><br><span class="line"><span class="comment">// image.width = imgWidth</span></span><br><span class="line"><span class="comment">// image.height = imgHeight</span></span><br><span class="line"></span><br><span class="line">image.onload = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  context.drawImage(image, width / <span class="number">2</span> - imgWidth / <span class="number">2</span>, height / <span class="number">2</span> - imgHeight / <span class="number">2</span>, imgWidth, imgHeight)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>效果如下<br>
+<canvas id="canvas1" style="margin: 0 auto;"></canvas></p>
+<script>
+const width = 300,
+  height = width * .75
+const imgHeight = height * 0.6,
+  imgWidth = imgHeight;
+let fn = null;
+(function() {
+  const canvas = document.getElementById('canvas1')
+
+  canvas.width = width
+  canvas.height = height
+  const context = canvas.getContext('2d');
+  const image = new Image();
+  image.src = 'avatar.png';
+  // image.width = imgWidth
+  // image.height = imgHeight
+  
+  image.onload = function() {
+    context.drawImage(image, width / 2 - imgWidth / 2, height / 2 - imgHeight / 2, imgWidth, imgHeight)
+    fn && fn();
+  }
+}());
+</script>
+<p>现在我们便绘制了一张图到canvas上面，是一张完整的图，然后我们现在将像素点取出来以一定间隔进行拼装</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> canvas = <span class="built_in">document</span>.getElementById(<span class="string">&#x27;canvas1&#x27;</span>);</span><br><span class="line"><span class="keyword">const</span> canvas2 = <span class="built_in">document</span>.getElementById(<span class="string">&#x27;canvas2&#x27;</span>);</span><br><span class="line">canvas2.width = width</span><br><span class="line">canvas2.height = height</span><br><span class="line"><span class="keyword">const</span> ctx = canvas.getContext(<span class="string">&#x27;2d&#x27;</span>);</span><br><span class="line"><span class="keyword">const</span> ctx2 = canvas2.getContext(<span class="string">&#x27;2d&#x27;</span>);</span><br><span class="line"><span class="keyword">const</span> imageData = ctx.getImageData(width / <span class="number">2</span> - imgWidth / <span class="number">2</span>, height / <span class="number">2</span> - imgHeight / <span class="number">2</span>, imgWidth, imgHeight);</span><br><span class="line"><span class="comment">// const imageData = ctx.getImageData(0, 0, width, height);</span></span><br><span class="line"><span class="keyword">const</span> pixData = imageData.data;</span><br><span class="line"><span class="comment">// 粒子的半径</span></span><br><span class="line"><span class="keyword">const</span> radius = <span class="number">2</span>;</span><br><span class="line"><span class="comment">// 像素点对象</span></span><br><span class="line"><span class="keyword">const</span> dots = [];</span><br><span class="line"><span class="comment">// 对数据宽高进行嵌套循环</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">let</span> x = <span class="number">0</span>; x &lt; imageData.width; x += radius * <span class="number">2</span>) &#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> y = <span class="number">0</span>; y &lt; imageData.height; y += radius * <span class="number">2</span>) &#123;</span><br><span class="line">    <span class="comment">// 当前像素的起始坐标 行的数据位置加上列的位置乘以4 4对应rgba的位置0，1，2，3</span></span><br><span class="line">    <span class="keyword">let</span> i = (y * imageData.width + x) * <span class="number">4</span>;</span><br><span class="line">    <span class="keyword">if</span> (pixData[i + <span class="number">3</span>] !== <span class="number">0</span> &amp;&amp; pixData[i] !== <span class="number">255</span> &amp;&amp; pixData[i + <span class="number">1</span>] !== <span class="number">255</span> &amp;&amp; pixData[i + <span class="number">2</span>] !== <span class="number">255</span>) &#123;</span><br><span class="line">      dots.push(&#123;</span><br><span class="line">        <span class="attr">x</span>: x + (width / <span class="number">2</span> - imgWidth / <span class="number">2</span>),</span><br><span class="line">        <span class="attr">y</span>: y + (height / <span class="number">2</span> - imgHeight / <span class="number">2</span>),</span><br><span class="line">        <span class="attr">ex</span>: <span class="built_in">Math</span>.random() * width,</span><br><span class="line">        <span class="attr">ey</span>: <span class="built_in">Math</span>.random() * height,</span><br><span class="line">        <span class="attr">color</span>: <span class="string">`rgba(<span class="subst">$&#123;pixData[i]&#125;</span>, <span class="subst">$&#123;pixData[i+<span class="number">1</span>]&#125;</span>,<span class="subst">$&#123;pixData[i+<span class="number">2</span>]&#125;</span>, 1)`</span></span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">dots.forEach(<span class="function">(<span class="params">&#123;</span></span></span><br><span class="line"><span class="params"><span class="function">  x,</span></span></span><br><span class="line"><span class="params"><span class="function">  y,</span></span></span><br><span class="line"><span class="params"><span class="function">  color</span></span></span><br><span class="line"><span class="params"><span class="function">&#125;</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(color)</span><br><span class="line">  ctx2.beginPath();</span><br><span class="line">  ctx2.fillStyle = color;</span><br><span class="line">  ctx2.arc(x, y, radius, <span class="number">0</span>, <span class="built_in">Math</span>.PI * <span class="number">2</span>);</span><br><span class="line">  ctx2.fill();</span><br><span class="line">  ctx2.closePath();</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>得到下面的效果<br>
+<canvas id="canvas2" style="margin: 0 auto;"></canvas><br>
+假如我们添加一个点击事件让粒子直接散开(直接点击上面的图片画板预览效果)</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">document</span>.getElementById(<span class="string">&#x27;canvas2&#x27;</span>).addEventListener(<span class="string">&#x27;click&#x27;</span>, <span class="function"><span class="keyword">function</span> <span class="title">_</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  ctx2.clearRect(<span class="number">0</span>, <span class="number">0</span>, width, height);</span><br><span class="line">  <span class="built_in">window</span>.dots.forEach(<span class="function">(<span class="params">dot</span>) =&gt;</span> &#123;</span><br><span class="line">    dot.x += (dot.x - dot.ex) * <span class="number">0.05</span>;</span><br><span class="line">    dot.y += (dot.y - dot.ey) * <span class="number">0.06</span>;</span><br><span class="line">    ctx2.beginPath();</span><br><span class="line">    ctx2.fillStyle = dot.color;</span><br><span class="line">    ctx2.arc(dot.x, dot.y, radius, <span class="number">0</span>, <span class="built_in">Math</span>.PI * <span class="number">2</span>);</span><br><span class="line">    ctx2.fill();</span><br><span class="line">    ctx2.closePath();</span><br><span class="line">  &#125;)</span><br><span class="line">  <span class="keyword">if</span> (count &lt; <span class="number">0</span>) &#123;</span><br><span class="line">    count = <span class="number">60</span></span><br><span class="line">    <span class="comment">// 调用刚才取像素点的方法重新绘图以重置</span></span><br><span class="line">    fn();</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    requestAnimationFrame(_);</span><br><span class="line">    count--;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;, <span class="literal">false</span>);</span><br></pre></td></tr></table></figure>
+<p>由此我们就可以延伸出许许多多的粒子动画效果了，散开，合并，随机轨迹运动等等</p>
+<script>
+// 粒子的半径
+const radius = 2;
+const canvas = document.getElementById('canvas1');
+const canvas2 = document.getElementById('canvas2');
+canvas2.width = width
+canvas2.height = height
+const ctx = canvas.getContext('2d');
+const ctx2 = canvas2.getContext('2d');
+let count = 100;
+document.getElementById('canvas2').addEventListener('click', function _() {
+  ctx2.clearRect(0, 0, width, height);
+  window.dots.forEach((dot) => {
+    dot.x += (dot.x - dot.ex) * 0.05;
+    dot.y += (dot.y - dot.ey) * 0.06;
+    ctx2.beginPath();
+    ctx2.fillStyle = dot.color;
+    ctx2.arc(dot.x, dot.y, radius, 0, Math.PI * 2);
+    ctx2.fill();
+    ctx2.closePath();
+  })
+  if (count < 0) {
+    count = 60
+    fn();
+  } else {
+    requestAnimationFrame(_);
+    count--;
+  }
+}, false);
+
+
+fn = function (){
+  ctx2.clearRect(0, 0, width, height);
+  const imageData = ctx.getImageData(width / 2 - imgWidth / 2, height / 2 - imgHeight / 2, imgWidth, imgHeight);
+  // const imageData = ctx.getImageData(0, 0, width, height);
+  const pixData = imageData.data;
+  // 像素点对象
+  window.dots = [];
+  // 对数据宽高进行嵌套循环
+  for (let x = 0; x < imageData.width; x += radius * 2) {
+    for (let y = 0; y < imageData.height; y += radius * 2) {
+      // 当前像素的起始坐标 行的数据位置加上列的位置乘以4 4对应rgba的位置0，1，2，3
+      let i = (y * imageData.width + x) * 4;
+      if (pixData[i + 3] !== 0 && pixData[i] !== 255 && pixData[i + 1] !== 255 && pixData[i + 2] !== 255) {
+        window.dots.push({
+          x: x + (width / 2 - imgWidth / 2),
+          y: y + (height / 2 - imgHeight / 2),
+          ex: Math.random() * width,
+          ey: Math.random() * height,
+          color: `rgba(${pixData[i]}, ${pixData[i+1]},${pixData[i+2]}, 1)`
+        })
+      }
+    }
+  }
+
+  window.dots.forEach(({
+    x,
+    y,
+    color
+  }) => {
+    ctx2.beginPath();
+    ctx2.fillStyle = color;
+    ctx2.arc(x, y, radius, 0, Math.PI * 2);
+    ctx2.fill();
+    ctx2.closePath();
+  })
+};
+</script>
+
+
+                <hr>
+                <!-- Pager -->
+                <ul class="pager clearfix">
+                    
+                    <li class="previous">
+                        <a href="/2018/06/09/nginx-use/" data-toggle="tooltip" data-placement="top"
+                            title="记一次博客从http到https的迁移（nginx的使用）">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2018/03/16/new-work-new-life/" data-toggle="tooltip" data-placement="top"
+                            title="新工作，新生活">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+
+                <!-- UY BEGIN -->
+                <br>
+                <div id="uyan_frame"></div>
+                <!--<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2138668"></script>-->
+                <!-- UY END -->
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+
+<aside id="sidebar">
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">Contents</strong>
+    
+    <ol class="nav">none</ol>
+    
+  </div>
+</aside>
+
+
+
+
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#canvas"
+                            title="canvas">canvas</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async (u, c) {
+        var d = document,
+            t = 'script',
+            o = d.createElement(t),
+            s = d.getElementsByTagName(t)[0];
+        o.src = u;
+        if (c) {
+            o.addEventListener('load', function (e) {
+                c(null, e);
+            }, false);
+        }
+        s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+    <!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center">
+          
+          
+          
+
+          
+          <li>
+            <a target="_blank" href="http://weibo.com/2539035205">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a target="_blank" href="https://github.com/Ryuurock">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a href="mailto:lwx_1993@outlook.com">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+        </ul>
+        <p class="copyright text-muted">
+          Wanxiang Long(Ryuurock) &copy; 1993-2022
+          <br>
+          <span id="busuanzi_container_site_uv">小站访客数<span id="busuanzi_value_site_uv"></span>人次</span>
+          |
+          <span id="busuanzi_container_site_pv">小站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/lx-blog.js"></script>
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- async load function -->
+<script>
+  function async (u, c) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) {
+      o.addEventListener('load', function (e) {
+        c(null, e);
+      }, false);
+    }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+  // only load tagcloud.js in tag.html
+  if ($('#tag_cloud').length !== 0) {
+    async ("/js/jquery.tagcloud.js", function () {
+      $.fn.tagcloud.defaults = {
+        //size: {start: 1, end: 1, unit: 'em'},
+        color: {
+          start: '#bbbbee',
+          end: '#0085a1'
+        },
+      };
+      $('#tag_cloud a').tagcloud();
+    })
+  }
+</script>
+
+<!--fastClick.js -->
+<script>
+  async ("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    var $nav = document.querySelector("nav");
+    if ($nav) FastClick.attach($nav);
+  })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+    <a id="rocket" href="#top" class="iconfont icon-23435"></a>
+    <script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+    <!-- Image to hack wechat -->
+    <!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+    <!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="baidu-site-verification" content="code-Hn2FTkozwu" />
+  <meta name="google-site-verification" content="VRegEMvasrnJoWUYvftfL9jaiIF1ovA-dZPb4juzyCA" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="keyword" content="事件,javascript">
+  <link rel="icon" href="/favicon.ico">
+  <!-- Place this tag in your head or just before your close body tag. -->
+  <title>
+    
+    如何完美阻止浏览器的滚动事件向上冒泡 - longwanxiang的博客 | Ryuurock | Web前端实习生
+    
+  </title>
+  <link rel="canonical" href="https://ryuurock.github.io/2017/06/19/mousewheel-bubble/">
+  <!-- Custom Fonts -->
+  <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+  <!-- Hux change font-awesome CDN to qiniu -->
+  <link href="//cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <!-- Bootstrap Core CSS -->
+  
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+  <!-- Custom CSS -->
+  
+<link rel="stylesheet" href="/css/beantech.min.css">
+
+  <!-- Pygments Highlight CSS -->
+  
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+<link rel="stylesheet" href="/css/widget.css">
+
+  
+<link rel="stylesheet" href="/css/rocket.css">
+
+  
+<link rel="stylesheet" href="/css/signature.css">
+
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  <link rel="stylesheet" type="text/css" href="//at.alicdn.com/t/font_qt49r5gb9r8b0529.css">
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+
+<body ontouchstart="">
+    <!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+  header.intro-header{
+    
+      background-image: url('/covers/post/IMG_2438.JPG')
+      /*post*/
+    
+  }
+  
+</style>
+
+<header class="intro-header" >
+  <!-- Signature -->
+  <div id="signature">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        
+          <div class="post-heading">
+            <div class="tags">
+                
+                  <a class="tag" href="/tags/#javascript" title="javascript">javascript</a>
+                
+                  <a class="tag" href="/tags/#事件" title="事件">事件</a>
+                
+            </div>
+            <h1>如何完美阻止浏览器的滚动事件向上冒泡</h1>
+            <h2 class="subheading"></h2>
+            <span class="meta">
+                Posted by Wanxiang Long(Ryuurock) on
+                2017-06-19
+            </span>
+          </div>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</header>
+
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header page-scroll">
+      <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Longwx Blog</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+    <div id="huxblog_navbar">
+      <div class="navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="/">Home</a></li>
+          <li><a href="/about/">About</a></li><li><a href="/archive/">Archives</a></li><li><a href="/tags/">Tags</a></li></ul>
+      </div>
+    </div>
+    <!-- /.navbar-collapse -->
+  </div>
+  <!-- /.container -->
+</nav>
+<script>
+  // Drop Bootstarp low-performance Navbar
+  // Use customize navbar with high-quality material design animation
+  // in high-perf jank-free CSS3 implementation
+  var $body = document.body;
+  var $toggle = document.querySelector('.navbar-toggle');
+  var $navbar = document.querySelector('#huxblog_navbar');
+  var $collapse = document.querySelector('.navbar-collapse');
+
+  $toggle.addEventListener('click', handleMagic)
+
+  function handleMagic(e) {
+    if ($navbar.className.indexOf('in') > 0) {
+      // CLOSE
+      $navbar.className = " ";
+      // wait until animation end.
+      setTimeout(function () {
+        // prevent frequently toggle
+        if ($navbar.className.indexOf('in') < 0) {
+          $collapse.style.height = "0px"
+        }
+      }, 400)
+    } else {
+      // OPEN
+      $collapse.style.height = "auto"
+      $navbar.className += " in";
+    }
+  }
+</script>
+
+
+    <!-- Modify by Yu-Hsuan Yen -->
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>我们都知道，浏览器的事件一般是从元素的一层一层网上冒泡的(<code>document.addEventListener</code>方法的第三个参数设置为<code>true</code>则是冒泡, <code>false</code>则是捕获)，鼠标的滚轮事件也不例外，当某个滚动区域的内容滚动到最底部时，则会往上走，找到最近的父元素，继续滚动。在某些时候这是个很不错的设定，但是当页面的可滚动区域过多的时候，便会造成不好的用户体验。给人以“到处都在动”的感觉，可能你马上会想到<code>event.stopPropagation()</code>这个方法，但是你可以先试试有用吗。#滑稽#</p>
+<p>没错，我也是试了之后发现根本没什么卵用，所以就在网上找  代码如下：（摘自<a target="_blank" rel="noopener" href="http://blog.csdn.net/jyy_12/article/details/6878049">http://blog.csdn.net/jyy_12/article/details/6878049</a>）:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$.fn.extend( &#123;</span><br><span class="line">  <span class="attr">preventScroll</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    $( <span class="built_in">this</span> ).each( <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">var</span> _this = <span class="built_in">this</span>;</span><br><span class="line">      <span class="keyword">if</span> ( navigator.userAgent.indexOf( <span class="string">&#x27;Firefox&#x27;</span> ) &gt;= <span class="number">0</span> ) &#123; <span class="comment">//firefox  </span></span><br><span class="line">        _this.addEventListener( <span class="string">&#x27;DOMMouseScroll&#x27;</span>, <span class="function"><span class="keyword">function</span>(<span class="params"> e </span>) </span>&#123;</span><br><span class="line">          _this.scrollTop += e.detail &gt; <span class="number">0</span> ? <span class="number">60</span> : -<span class="number">60</span>;</span><br><span class="line">          e.preventDefault();</span><br><span class="line">        &#125;, <span class="literal">false</span> );</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        _this.onmousewheel = <span class="function"><span class="keyword">function</span>(<span class="params"> e </span>) </span>&#123;</span><br><span class="line">          e = e || <span class="built_in">window</span>.event;</span><br><span class="line">          _this.scrollTop += e.wheelDelta &gt; <span class="number">0</span> ? -<span class="number">60</span> : <span class="number">60</span>;</span><br><span class="line">          <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; )</span><br><span class="line">  &#125;</span><br><span class="line">&#125; );</span><br><span class="line">$( <span class="string">&quot;.box&quot;</span> ).preventScroll();</span><br></pre></td></tr></table></figure>
+<p>然后问题就这么愉快的解决了！<br>
+于是我便开始愉快的开始测试，是的当当前滚动条滚动到滚动到顶部继续滚动的话，不会导致body或者其他父元素的滚动条继续滚动，但是总觉得哪里没对。不信的童鞋可以直接写代码测试一下。</p>
+<p>其他浏览器我没有测试过，用chrome的童鞋肯定发现了，惯性呢？滚动的惯性呢？是的因为<code>e.preventDefault()</code>阻止了它的默认滚动行为，改用<code>this.scrollTop += e.detail &gt; 0 ? 60 : -60</code>这种编程式的滚动，导致滚动没那么流畅了。肯定有人会说，再继续写代码模拟这个惯性不就好了吗？ 确实可以，但不觉得代价太大了点？是的，肯定有其他的解决办法。其实爱思考的人看到这里早已找到了答案，通过<code>e.detail</code>或者<code>e.wheelDelta</code>是可以知道鼠标滚轮是在向上还是向下滚动的，<code>向上滚，滚动到顶部，则e.preventDefault()，向下滚，滚动到最下面，也e.preventDefault()</code>，于是这个题目就这样完美的解决了，滚动的行为依然是浏览器的默认行为，但是它确实不再向上冒泡了，贴上代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">$.fn.extend( &#123;</span><br><span class="line">  <span class="attr">preventScroll</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> $( <span class="built_in">this</span> ).each( <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">var</span> _this = <span class="built_in">this</span>;</span><br><span class="line">      <span class="keyword">if</span> ( navigator.userAgent.toLowerCase().indexOf( <span class="string">&quot;firefox&quot;</span> ) &gt; <span class="number">0</span> ) &#123;</span><br><span class="line">        _this.addEventListener( <span class="string">&#x27;DOMMouseScroll&#x27;</span>, <span class="function"><span class="keyword">function</span>(<span class="params"> e </span>) </span>&#123;</span><br><span class="line">          <span class="comment">// 滚动到最下面，并且鼠标向上（反正是一直往下拉那个动作）</span></span><br><span class="line">          <span class="keyword">if</span> ( <span class="built_in">this</span>.scrollTop + <span class="built_in">this</span>.clientHeight == <span class="built_in">this</span>.scrollHeight &amp;&amp; e.detail &gt; <span class="number">0</span> ) &#123;</span><br><span class="line">            e.preventDefault();</span><br><span class="line">            e.returnValue = <span class="literal">false</span>;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="comment">// 滚动到最上面，并且鼠标向下（反正是一直往上拉那个动作）</span></span><br><span class="line">          <span class="keyword">else</span> <span class="keyword">if</span> ( <span class="built_in">this</span>.scrollTop === <span class="number">0</span> &amp;&amp; e.detail &lt; <span class="number">0</span> ) &#123;</span><br><span class="line">            e.preventDefault();</span><br><span class="line">            e.returnValue = <span class="literal">false</span>;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;, <span class="literal">false</span> );</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        _this.addEventListener( <span class="string">&#x27;mousewheel&#x27;</span>, <span class="function"><span class="keyword">function</span>(<span class="params"> e </span>) </span>&#123;</span><br><span class="line">          <span class="keyword">if</span> ( <span class="built_in">this</span>.scrollTop + <span class="built_in">this</span>.clientHeight == <span class="built_in">this</span>.scrollHeight &amp;&amp; e.wheelDelta &lt; <span class="number">0</span> ) &#123;</span><br><span class="line">            e.preventDefault();</span><br><span class="line">            e.returnValue = <span class="literal">false</span>;</span><br><span class="line">          &#125; <span class="keyword">else</span> <span class="keyword">if</span> ( <span class="built_in">this</span>.scrollTop === <span class="number">0</span> &amp;&amp; e.wheelDelta &gt; <span class="number">0</span> ) &#123;</span><br><span class="line">            e.preventDefault();</span><br><span class="line">            e.returnValue = <span class="literal">false</span>;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;, <span class="literal">false</span> );</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> <span class="built_in">this</span>;</span><br><span class="line">    &#125; );</span><br><span class="line">  &#125;</span><br><span class="line">&#125; );</span><br></pre></td></tr></table></figure>
+<p>是的，这个问题就这么完美解决了，可能不是最佳实现，但是确实比上面的代码要更贴近浏览器原来的样子，我们在写代码的时候对于浏览器的默认行为，不管是从代码来说还是用户体验来说，都应该抱着谨慎的态度。</p>
+
+
+                <hr>
+                <!-- Pager -->
+                <ul class="pager clearfix">
+                    
+                    <li class="previous">
+                        <a href="/2017/06/19/jQuery-ajax-intercept/" data-toggle="tooltip" data-placement="top"
+                            title="jQuery的ajax方法拦截器">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+
+                <!-- UY BEGIN -->
+                <br>
+                <div id="uyan_frame"></div>
+                <!--<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2138668"></script>-->
+                <!-- UY END -->
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+
+<aside id="sidebar">
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">Contents</strong>
+    
+    <ol class="nav">none</ol>
+    
+  </div>
+</aside>
+
+
+
+
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#javascript"
+                            title="javascript">javascript</a>
+                        
+                        <a class="tag" href="/tags/#事件"
+                            title="事件">事件</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async (u, c) {
+        var d = document,
+            t = 'script',
+            o = d.createElement(t),
+            s = d.getElementsByTagName(t)[0];
+        o.src = u;
+        if (c) {
+            o.addEventListener('load', function (e) {
+                c(null, e);
+            }, false);
+        }
+        s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+    <!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center">
+          
+          
+          
+
+          
+          <li>
+            <a target="_blank" href="http://weibo.com/2539035205">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a target="_blank" href="https://github.com/Ryuurock">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a href="mailto:lwx_1993@outlook.com">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+        </ul>
+        <p class="copyright text-muted">
+          Wanxiang Long(Ryuurock) &copy; 1993-2022
+          <br>
+          <span id="busuanzi_container_site_uv">小站访客数<span id="busuanzi_value_site_uv"></span>人次</span>
+          |
+          <span id="busuanzi_container_site_pv">小站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/lx-blog.js"></script>
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- async load function -->
+<script>
+  function async (u, c) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) {
+      o.addEventListener('load', function (e) {
+        c(null, e);
+      }, false);
+    }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+  // only load tagcloud.js in tag.html
+  if ($('#tag_cloud').length !== 0) {
+    async ("/js/jquery.tagcloud.js", function () {
+      $.fn.tagcloud.defaults = {
+        //size: {start: 1, end: 1, unit: 'em'},
+        color: {
+          start: '#bbbbee',
+          end: '#0085a1'
+        },
+      };
+      $('#tag_cloud a').tagcloud();
+    })
+  }
+</script>
+
+<!--fastClick.js -->
+<script>
+  async ("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    var $nav = document.querySelector("nav");
+    if ($nav) FastClick.attach($nav);
+  })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+    <a id="rocket" href="#top" class="iconfont icon-23435"></a>
+    <script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+    <!-- Image to hack wechat -->
+    <!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+    <!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

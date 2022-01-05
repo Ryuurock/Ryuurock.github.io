@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="baidu-site-verification" content="code-Hn2FTkozwu" />
+  <meta name="google-site-verification" content="VRegEMvasrnJoWUYvftfL9jaiIF1ovA-dZPb4juzyCA" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="keyword" content="Web前端|前端|javascript|css|html|html5">
+  <link rel="icon" href="/favicon.ico">
+  <!-- Place this tag in your head or just before your close body tag. -->
+  <title>
+    
+    Chrome Headless下的矛与盾 - longwanxiang的博客 | Ryuurock | Web前端实习生
+    
+  </title>
+  <link rel="canonical" href="https://ryuurock.github.io/2018/02/10/chrome-headless-spear-and-shield/">
+  <!-- Custom Fonts -->
+  <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+  <!-- Hux change font-awesome CDN to qiniu -->
+  <link href="//cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <!-- Bootstrap Core CSS -->
+  
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+  <!-- Custom CSS -->
+  
+<link rel="stylesheet" href="/css/beantech.min.css">
+
+  <!-- Pygments Highlight CSS -->
+  
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+<link rel="stylesheet" href="/css/widget.css">
+
+  
+<link rel="stylesheet" href="/css/rocket.css">
+
+  
+<link rel="stylesheet" href="/css/signature.css">
+
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  <link rel="stylesheet" type="text/css" href="//at.alicdn.com/t/font_qt49r5gb9r8b0529.css">
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+
+<body ontouchstart="">
+    <!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+  header.intro-header{
+    
+      background-image: url('/covers/post/IMG_3346.JPG')
+      /*post*/
+    
+  }
+  
+</style>
+
+<header class="intro-header" >
+  <!-- Signature -->
+  <div id="signature">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        
+          <div class="post-heading">
+            <div class="tags">
+                
+                  <a class="tag" href="/tags/#headless" title="headless">headless</a>
+                
+                  <a class="tag" href="/tags/#chrome" title="chrome">chrome</a>
+                
+                  <a class="tag" href="/tags/#puppeteer" title="puppeteer">puppeteer</a>
+                
+            </div>
+            <h1>Chrome Headless下的矛与盾</h1>
+            <h2 class="subheading">加密与解密，攻与防，兵来将挡，水来土掩，瞬息万变的互联网无时无刻不在上演着这一幕</h2>
+            <span class="meta">
+                Posted by Wanxiang Long(Ryuurock) on
+                2018-02-10
+            </span>
+          </div>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</header>
+
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header page-scroll">
+      <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Longwx Blog</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+    <div id="huxblog_navbar">
+      <div class="navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="/">Home</a></li>
+          <li><a href="/about/">About</a></li><li><a href="/archive/">Archives</a></li><li><a href="/tags/">Tags</a></li></ul>
+      </div>
+    </div>
+    <!-- /.navbar-collapse -->
+  </div>
+  <!-- /.container -->
+</nav>
+<script>
+  // Drop Bootstarp low-performance Navbar
+  // Use customize navbar with high-quality material design animation
+  // in high-perf jank-free CSS3 implementation
+  var $body = document.body;
+  var $toggle = document.querySelector('.navbar-toggle');
+  var $navbar = document.querySelector('#huxblog_navbar');
+  var $collapse = document.querySelector('.navbar-collapse');
+
+  $toggle.addEventListener('click', handleMagic)
+
+  function handleMagic(e) {
+    if ($navbar.className.indexOf('in') > 0) {
+      // CLOSE
+      $navbar.className = " ";
+      // wait until animation end.
+      setTimeout(function () {
+        // prevent frequently toggle
+        if ($navbar.className.indexOf('in') < 0) {
+          $collapse.style.height = "0px"
+        }
+      }, 400)
+    } else {
+      // OPEN
+      $collapse.style.height = "auto"
+      $navbar.className += " in";
+    }
+  }
+</script>
+
+
+    <!-- Modify by Yu-Hsuan Yen -->
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>上个月刚好写了一篇<a href="/2018/01/09/puppeteer/">puppeteer初探</a>，讲了一些开发中使用puppeteer进行自动化操作的东西，比如绕过一些网站的人机识别验证，自动化截图等。我们示例的是阿里云的数据风控管理平台的滑动验证，单一的滑动轨迹算法刚开始能<code>99%</code>的验证成功，但是到后面系统可能识别到一个ip反复的尝试滑动引起了注意，于是把提交过去的数据进行了汇总分析，使用了数学公式进行反向的求我们的公式（官方号称<strong>通过生物特征判定操作计算机的是人还是机器</strong>），于是成功率在我们的反复尝试下一直下跌直到成功率小于<code>1%</code>，具体什么公式大概能猜到，线性回归？反正我数学忘干净了（也许就没存进去过😂），那么我们使用x,y轴都随机组合（<code>9*9</code>）的算法来生成滑动轨迹，让云端的算法无法验证，那么我们就有81种可能，其实严格来说比这个更多，因为包括每一步都我们都是随机的。这样一来，成功率又达到了99%以上（无法达到100%，因为真人去滑都可能被判定失败）。</p>
+<p>可就在昨天正当我开开心心做其他事情的时候，测试那边反馈说全挂了。阿里云客户端的sdk在2018-02-09 09:23:55这个时间打包更新了。我真是*了狗了。经过我测试，在chrome受代码控制运行时，人去拉都100%失败，就是说他们知道我们处于自动测试环境，知道这个问题就简单了，我们打印了puppeteer的启动参数，发现一个叫<code>--enable-automation</code>的参数，允许自动化？干掉这个参数后再启动果然程序和人都能成功通过。</p>
+<p>不要高兴得太早，此时我们headless模式处于禁用状态，打开headless模式，成功率又退回0%，可见这次阿里云的更新就是冲着chrome的headless模式来的，甚至我怀疑就是我们的行为导致的。在和我们PM一番伸着脖子google后，发现了<a target="_blank" rel="noopener" href="http://antoinevastel.github.io/bot%20detection/2017/08/05/detect-chrome-headless.html">Detecting Chrome Headless</a>这篇文章，根据文中提到的方法，我进行了除了<code>Modernizr</code>这个的测试</p>
+<ul>
+<li>User agent      这一项不用想，puppeteer api提供了修改ua的，肯定不可能是这个，false</li>
+<li>Languages       我打出来是<code>zh-cn</code>，也许是 chromium 更新了，false</li>
+<li>WebGL           false</li>
+<li>Missing image   false</li>
+</ul>
+<p>当我看到<code>Plugins</code>这一项时，菊花一紧，妈蛋多半是这个了，我在headless模式打出navigator.plugins.length == 0果然为true，应该是headless模式下禁用了，心想完了，无解了，浏览器属性肯定是不允许修改的。</p>
+<p>永不言弃的我们再一通google，发现了<a target="_blank" rel="noopener" href="https://intoli.com/blog/making-chrome-headless-undetectable/">MAKING CHROME HEADLESS UNDETECTABLE</a>和<a target="_blank" rel="noopener" href="https://intoli.com/blog/not-possible-to-block-chrome-headless/">IT IS <em>NOT</em> POSSIBLE TO DETECT AND BLOCK CHROME HEADLESS</a>这两篇文章，是同一个人写的。前者是检测headless模式，后者是headless模式防止被检测（我就笑笑不说话😄），后者中提到一个puppeteer的api叫<code>evaluateOnNewDocument</code>，在page这个class下，page指代标签页，看文档后我才恍然大悟，原来puppeteer的文档有描述过此类问题的处理办法，下面我将它贴出来</p>
+<blockquote>
+<p>page.evaluateOnNewDocument(pageFunction, …args)</p>
+<ul>
+<li>pageFunction &lt;function|string&gt; Function to be evaluated &gt; in browser context</li>
+<li>…args &lt;…Serializable&gt; Arguments to pass to &gt; pageFunction</li>
+<li>returns: <Promise><br>
+Adds a function which would be invoked in one of the &gt; following scenarios:</li>
+<li>whenever the page is navigated</li>
+<li>whenever the child frame is attached or navigated. In &gt; this case, the function is invoked in the context of &gt; the newly attached frame<br>
+The function is invoked after the document was created &gt; but before any of its scripts were run. This is useful &gt; to amend the JavaScript environment, e.g. to seed &gt; Math.random.</li>
+</ul>
+<p>An example of overriding the navigator.languages &gt; property before the page loads:</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// preload.js</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// overwrite the `languages` property to use a custom getter</span></span><br><span class="line"><span class="built_in">Object</span>.defineProperty(navigator, <span class="string">&quot;languages&quot;</span>, &#123;</span><br><span class="line">  <span class="attr">get</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> [<span class="string">&quot;en-US&quot;</span>, <span class="string">&quot;en&quot;</span>, <span class="string">&quot;bn&quot;</span>];</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// In your puppeteer script, assuming the preload.js file is in same folder of our script</span></span><br><span class="line"><span class="keyword">const</span> preloadFile = fs.readFileSync(<span class="string">&#x27;./preload.js&#x27;</span>, <span class="string">&#x27;utf8&#x27;</span>);</span><br><span class="line"><span class="keyword">await</span> page.evaluateOnNewDocument(preloadFile);</span><br></pre></td></tr></table></figure>
+<p>在dom生成或插入前，我们重写navigator下的languages属性的getter，<code>defineProperty</code>这个api是ES5加入的，目前pupeteer提供的Chromuim的版本也不用担心兼容问题。讲道理，我感觉这是浏览器的bug，曲线修改系统属性？也不管了，我照着文档里提到的几个属性把它们的getter都重写了，虽然文档描述的这个api更像是一个事件（The function is invoked after the document was created but before any of its scripts were run. ）,但是我们还是将这些代码放到了page.goto之前，懒得再去试放到后面行不行。</p>
+<p>在这一些准备好后，我们开启了headless模式，结果在意料之中，问题便由此解决，也不知道阿里云下次更新后，这个办法会不会被封掉，等他们封掉后也许chromium和puppeteer又更新了😊。</p>
+
+
+                <hr>
+                <!-- Pager -->
+                <ul class="pager clearfix">
+                    
+                    <li class="previous">
+                        <a href="/2018/02/27/front-end-focus/" data-toggle="tooltip" data-placement="top"
+                            title="前端疑难问题整理">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2018/01/20/custom-webpack-html-handle-plugin/" data-toggle="tooltip" data-placement="top"
+                            title="webpack下html内容相关的处理">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+
+                <!-- UY BEGIN -->
+                <br>
+                <div id="uyan_frame"></div>
+                <!--<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2138668"></script>-->
+                <!-- UY END -->
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+
+<aside id="sidebar">
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">Contents</strong>
+    
+    <ol class="nav">none</ol>
+    
+  </div>
+</aside>
+
+
+
+
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#headless"
+                            title="headless">headless</a>
+                        
+                        <a class="tag" href="/tags/#chrome"
+                            title="chrome">chrome</a>
+                        
+                        <a class="tag" href="/tags/#puppeteer"
+                            title="puppeteer">puppeteer</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async (u, c) {
+        var d = document,
+            t = 'script',
+            o = d.createElement(t),
+            s = d.getElementsByTagName(t)[0];
+        o.src = u;
+        if (c) {
+            o.addEventListener('load', function (e) {
+                c(null, e);
+            }, false);
+        }
+        s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+    <!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center">
+          
+          
+          
+
+          
+          <li>
+            <a target="_blank" href="http://weibo.com/2539035205">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a target="_blank" href="https://github.com/Ryuurock">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a href="mailto:lwx_1993@outlook.com">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+        </ul>
+        <p class="copyright text-muted">
+          Wanxiang Long(Ryuurock) &copy; 1993-2022
+          <br>
+          <span id="busuanzi_container_site_uv">小站访客数<span id="busuanzi_value_site_uv"></span>人次</span>
+          |
+          <span id="busuanzi_container_site_pv">小站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/lx-blog.js"></script>
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- async load function -->
+<script>
+  function async (u, c) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) {
+      o.addEventListener('load', function (e) {
+        c(null, e);
+      }, false);
+    }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+  // only load tagcloud.js in tag.html
+  if ($('#tag_cloud').length !== 0) {
+    async ("/js/jquery.tagcloud.js", function () {
+      $.fn.tagcloud.defaults = {
+        //size: {start: 1, end: 1, unit: 'em'},
+        color: {
+          start: '#bbbbee',
+          end: '#0085a1'
+        },
+      };
+      $('#tag_cloud a').tagcloud();
+    })
+  }
+</script>
+
+<!--fastClick.js -->
+<script>
+  async ("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    var $nav = document.querySelector("nav");
+    if ($nav) FastClick.attach($nav);
+  })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+    <a id="rocket" href="#top" class="iconfont icon-23435"></a>
+    <script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+    <!-- Image to hack wechat -->
+    <!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+    <!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

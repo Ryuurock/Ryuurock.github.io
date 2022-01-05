@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="baidu-site-verification" content="code-Hn2FTkozwu" />
+  <meta name="google-site-verification" content="VRegEMvasrnJoWUYvftfL9jaiIF1ovA-dZPb4juzyCA" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="keyword" content="Web前端|前端|javascript|css|html|html5">
+  <link rel="icon" href="/favicon.ico">
+  <!-- Place this tag in your head or just before your close body tag. -->
+  <title>
+    
+    解决Websocket并发执行的问题 - longwanxiang的博客 | Ryuurock | Web前端实习生
+    
+  </title>
+  <link rel="canonical" href="https://ryuurock.github.io/2017/09/12/page-parallel-execute/">
+  <!-- Custom Fonts -->
+  <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+  <!-- Hux change font-awesome CDN to qiniu -->
+  <link href="//cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <!-- Bootstrap Core CSS -->
+  
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+  <!-- Custom CSS -->
+  
+<link rel="stylesheet" href="/css/beantech.min.css">
+
+  <!-- Pygments Highlight CSS -->
+  
+<link rel="stylesheet" href="/css/highlight.css">
+
+  
+<link rel="stylesheet" href="/css/widget.css">
+
+  
+<link rel="stylesheet" href="/css/rocket.css">
+
+  
+<link rel="stylesheet" href="/css/signature.css">
+
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  <link rel="stylesheet" type="text/css" href="//at.alicdn.com/t/font_qt49r5gb9r8b0529.css">
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+
+<body ontouchstart="">
+    <!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+  header.intro-header{
+    
+      background-image: url('/covers/post/IMG_2847.JPG')
+      /*post*/
+    
+  }
+  
+</style>
+
+<header class="intro-header" >
+  <!-- Signature -->
+  <div id="signature">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        
+          <div class="post-heading">
+            <div class="tags">
+                
+                  <a class="tag" href="/tags/#websocket" title="websocket">websocket</a>
+                
+                  <a class="tag" href="/tags/#并发" title="并发">并发</a>
+                
+            </div>
+            <h1>解决Websocket并发执行的问题</h1>
+            <h2 class="subheading">setTimeout也算能线救国</h2>
+            <span class="meta">
+                Posted by Wanxiang Long(Ryuurock) on
+                2017-09-12
+            </span>
+          </div>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</header>
+
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header page-scroll">
+      <button type="button" class="navbar-toggle">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Longwx Blog</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+    <div id="huxblog_navbar">
+      <div class="navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="/">Home</a></li>
+          <li><a href="/about/">About</a></li><li><a href="/archive/">Archives</a></li><li><a href="/tags/">Tags</a></li></ul>
+      </div>
+    </div>
+    <!-- /.navbar-collapse -->
+  </div>
+  <!-- /.container -->
+</nav>
+<script>
+  // Drop Bootstarp low-performance Navbar
+  // Use customize navbar with high-quality material design animation
+  // in high-perf jank-free CSS3 implementation
+  var $body = document.body;
+  var $toggle = document.querySelector('.navbar-toggle');
+  var $navbar = document.querySelector('#huxblog_navbar');
+  var $collapse = document.querySelector('.navbar-collapse');
+
+  $toggle.addEventListener('click', handleMagic)
+
+  function handleMagic(e) {
+    if ($navbar.className.indexOf('in') > 0) {
+      // CLOSE
+      $navbar.className = " ";
+      // wait until animation end.
+      setTimeout(function () {
+        // prevent frequently toggle
+        if ($navbar.className.indexOf('in') < 0) {
+          $collapse.style.height = "0px"
+        }
+      }, 400)
+    } else {
+      // OPEN
+      $collapse.style.height = "auto"
+      $navbar.className += " in";
+    }
+  }
+</script>
+
+
+    <!-- Modify by Yu-Hsuan Yen -->
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>在解决掉这个问题之前，我都有点想放弃了，因为尝试的方法都不行，照惯例先来描述下问题吧。</p>
+<blockquote>
+<p>为了能在所有页面能接收到服务器给用户发起的通知，所以我们在每个页面建立了<code>websocket</code>长连接来监听服务器的动静，那么问题来了，如果我开启了两个，三个甚至四个标签页，那效果你能猜到：刷刷刷一排通知烦到你直接关了通知功能。</p>
+</blockquote>
+<p>标签页之间的通信，我了解到的目前就两种</p>
+<ul>
+<li>通过<code>window.opener.window.postMessage</code>来对<code>opener</code>发起消息</li>
+<li>通过<code>localStorage</code>或<code>webSQL</code>等媒介来通信</li>
+</ul>
+<p>当然还有很多奇奇怪怪的办法，主流的办法还是采用后者，前者因为限制太多直接pass，<code>webSQL</code>有兼容性问题还是pass，所以最后选择了<code>localStorage</code>。</p>
+<p>其实我最先的解决办法还是很简单直接的，看起来也是对的：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 比如我的消息回调函数是这样的</span></span><br><span class="line">websocket.onmessage = <span class="function"><span class="keyword">function</span>(<span class="params"> msg </span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> ( <span class="built_in">localStorage</span>.getItem( <span class="string">&#x27;isNotice&#x27;</span> ) === <span class="string">&#x27;1&#x27;</span> ) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">localStorage</span>.setItem( <span class="string">&#x27;isNotice&#x27;</span>, <span class="string">&#x27;1&#x27;</span> );</span><br><span class="line">  <span class="comment">// 进行通知</span></span><br><span class="line">  doNotice( msg );</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 一秒后重置为未通知，因为同时通知的时间比较接近，所以需要等待1秒左右再重置</span></span><br><span class="line">  <span class="built_in">setTimeout</span>( <span class="function">() =&gt;</span> <span class="built_in">localStorage</span>.setItem( <span class="string">&#x27;isNotice&#x27;</span>, <span class="string">&#x27;0&#x27;</span> ), <span class="number">1e3</span> );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>是不是看起来很完美，对呀我也觉得很完美，可是我们忽略了一个问题，浏览器在往磁盘写文件的时候是需要时间的，而这个Output动作相对于JavaScript的执行来说非常的耗时，两个通知的时间非常非常的接近，经过我的测试最近的达到<code>5ms</code>，还是在只测试了几次的情况。所以这短短的5ms根本来不及将数据写入到磁盘（或许原理不是这样，但在两个标签页的情况下测试结果确实是一个先通知进行磁盘写入，后通知的<code>localStorage.getItem( 'isNotice' )</code>还是等于<code>0</code>）.</p>
+<p>于是我就想到通过<code>localStorage</code>来同步每次通知开启的情况代码太乱就不贴出来了，直接说说思路</p>
+<blockquote>
+<p>标签页通常情况是一个一个打开的，那么我们就直接从websocket链接本身来解决问题，当打开一个页面时我们开启通知，然后在<code>localStorage</code>标记好通知已经开启，同时监听一个叫<code>onunload</code>的事件(就是页面在跳转或关闭时会触发的事件)，事件响应时我们标记通知websocket已经关闭，然后我们新开页面的时候就去再去监听<code>Storage</code>事件（如果通知开启过了），这个事件一旦响应，我们就再去启动<code>websocket</code>链接。连起来的逻辑就是<br/><br/>整个系统只允许开启一个<code>websocket</code>链接，开启了<code>websocket</code>的页面在关闭时去标记通知已经关闭，其他页面知道后就会再去开启一个<code>websocket</code>链接，可问题就是，只能在两个页面开启的情况下有效，因为如果有两个页面监听了<code>Storage</code>事件，那么还是会开启两次链接，即使解决了这个问题，当浏览器崩溃等非正常关闭页面时，<code>onunload</code>事件不会触发，就是说如果页面崩溃一次，那就再也见不到通知了。这很悲惨，于是我又回到了“<strong>在开启多个websocket连接的情况，如何只通知一次消息</strong>”这个问题</p>
+</blockquote>
+<p>经过一番深思，我想到了“你们这么积极要通知，那好，等你们闹腾完了我再把消息拿去通知吧”，思路是这样的：</p>
+<blockquote>
+<p>通知来临时我们直接将通知内容写到<code>Storage</code>，然后<code>setTimeout</code>延时来取得这个内容进行通知，然后再移除这个通知内容，但是setTimeout的时间非常关键，如果是个固定值，那也白忙活了，必须保证每个页面的延时都不一样且相差较大</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">websocket.onmessage = <span class="function"><span class="keyword">function</span>(<span class="params"> msg </span>) </span>&#123;</span><br><span class="line">  <span class="built_in">localStorage</span>.setItem( <span class="string">&#x27;notice&#x27;</span>, msg );</span><br><span class="line"></span><br><span class="line">  <span class="built_in">setTimeout</span>( <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> noticeContent = <span class="built_in">localStorage</span>.getItem( <span class="string">&#x27;notice&#x27;</span> )</span><br><span class="line">    noticeContent &amp;&amp; doNotice( noticeContent );</span><br><span class="line">    <span class="built_in">localStorage</span>.removeItem( <span class="string">&#x27;notice&#x27;</span> );</span><br><span class="line">  &#125;, <span class="built_in">Math</span>.random() * <span class="number">3000</span> )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其实只能说问题解决了一半，因为算法能力比较捉急，只能随便写个3000内的随机数，如果运气不好随机到很接近的数，还是可能会重复通知，并且页面越多，几率越大。如果你看到这里有什么好的办法，欢迎邮件或留言通知我与我互相交流。</p>
+<p>也许要从根本解决这个问题，就只能开启一个通知吧。</p>
+
+
+                <hr>
+                <!-- Pager -->
+                <ul class="pager clearfix">
+                    
+                    <li class="previous">
+                        <a href="/2017/09/21/ES5-array-func/" data-toggle="tooltip" data-placement="top"
+                            title="ECMAScript5中新增的数组遍历方法">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2017/09/04/Observer/" data-toggle="tooltip" data-placement="top"
+                            title="使用观察者模式（发布-订阅模式）对抽象组件与业务组件进行解耦">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- duoshuo Share start -->
+                
+
+                <!-- UY BEGIN -->
+                <br>
+                <div id="uyan_frame"></div>
+                <!--<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2138668"></script>-->
+                <!-- UY END -->
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+
+<aside id="sidebar">
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">Contents</strong>
+    
+    <ol class="nav">none</ol>
+    
+  </div>
+</aside>
+
+
+
+
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#websocket"
+                            title="websocket">websocket</a>
+                        
+                        <a class="tag" href="/tags/#并发"
+                            title="并发">并发</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async (u, c) {
+        var d = document,
+            t = 'script',
+            o = d.createElement(t),
+            s = d.getElementsByTagName(t)[0];
+        o.src = u;
+        if (c) {
+            o.addEventListener('load', function (e) {
+                c(null, e);
+            }, false);
+        }
+        s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+    <!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center">
+          
+          
+          
+
+          
+          <li>
+            <a target="_blank" href="http://weibo.com/2539035205">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a target="_blank" href="https://github.com/Ryuurock">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a href="mailto:lwx_1993@outlook.com">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+
+        </ul>
+        <p class="copyright text-muted">
+          Wanxiang Long(Ryuurock) &copy; 1993-2022
+          <br>
+          <span id="busuanzi_container_site_uv">小站访客数<span id="busuanzi_value_site_uv"></span>人次</span>
+          |
+          <span id="busuanzi_container_site_pv">小站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/lx-blog.js"></script>
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- async load function -->
+<script>
+  function async (u, c) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) {
+      o.addEventListener('load', function (e) {
+        c(null, e);
+      }, false);
+    }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+  // only load tagcloud.js in tag.html
+  if ($('#tag_cloud').length !== 0) {
+    async ("/js/jquery.tagcloud.js", function () {
+      $.fn.tagcloud.defaults = {
+        //size: {start: 1, end: 1, unit: 'em'},
+        color: {
+          start: '#bbbbee',
+          end: '#0085a1'
+        },
+      };
+      $('#tag_cloud a').tagcloud();
+    })
+  }
+</script>
+
+<!--fastClick.js -->
+<script>
+  async ("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    var $nav = document.querySelector("nav");
+    if ($nav) FastClick.attach($nav);
+  })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+    <a id="rocket" href="#top" class="iconfont icon-23435"></a>
+    <script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+    <!-- Image to hack wechat -->
+    <!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+    <!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
